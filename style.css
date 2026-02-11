@@ -1,0 +1,38 @@
+body {
+    background-color: #1e1e1e;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: 20px;
+}
+
+#board {
+    display: grid;
+    /* Creamos 10 columnas iguales de 55px */
+    grid-template-columns: repeat(10, 55px);
+    grid-template-rows: repeat(10, 55px);
+    border: 5px solid #444;
+    box-shadow: 0 0 30px rgba(0,0,0,0.7);
+}
+
+.square {
+    width: 55px;
+    height: 55px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Patrón de 3 colores del Saikumathon */
+.color-0 { background-color: #ffffff; } /* Blanco */
+.color-1 { background-color: #000000; } /* Negro */
+.color-2 { background-color: #808080; } /* Gris */
+
+.piece {
+    width: 48px; /* Un poco más pequeña que la casilla para que respire */
+    height: 48px;
+    object-fit: contain;
+}
