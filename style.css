@@ -1,0 +1,25 @@
+#board {
+    display: grid;
+    grid-template-columns: repeat(10, 60px);
+    grid-template-rows: repeat(10, 60px);
+    border: 5px solid #333;
+}
+
+.square {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Colores basados en tu tablero */
+.white { background-color: #ffffff; }
+.black { background-color: #1a1a1a; }
+.gray  { background-color: #999999; }
+
+.piece {
+    width: 50px; /* Ajustado para que no se salga de la casilla */
+    height: 50px;
+    user-select: none;
+}
