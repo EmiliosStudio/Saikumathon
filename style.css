@@ -1,0 +1,42 @@
+/* 1. REGISTRAMOS TU FUENTE PERSONALIZADA */
+@font-face {
+    font-family: 'Emiliosans';
+    src: url('./Emiliosans-Regular.ttf'); /* Verifica que el nombre del archivo sea exacto */
+}
+
+body {
+    background-color: #121212;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    /* Fuente por defecto para el resto del sitio */
+    font-family: 'Segoe UI', sans-serif; 
+}
+
+/* 2. APLICAMOS LA FUENTE AL TÍTULO */
+h1 {
+    font-family: 'Emiliosans', sans-serif;
+    font-size: 3em;
+    color: #4db8ff;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+/* 3. APLICAMOS LA FUENTE A LA INTRODUCCIÓN */
+#info-panel {
+    font-family: 'Emiliosans', sans-serif;
+    height: 500px;
+    max-width: 350px;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    font-size: 1.2em; /* Un poco más grande para que se luzca tu letra */
+    line-height: 1.5;
+    color: #ffffff;
+}
+
+/* ... (el resto de tu CSS para el tablero y modal se mantiene igual) ... */
