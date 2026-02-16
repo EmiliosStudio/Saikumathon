@@ -10,14 +10,14 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100vh;
-    margin: 0;
+    height: 90vh;
+    margin: -10;
     font-family: sans-serif;
     overflow: hidden;
 }
 
 h1 {
-    font-family: 'Emiliosans', sans-serif;
+    font-family: 'Emiliosans';
     font-size: 2.5em; 
     margin: 0 0 10px 0;
 }
@@ -120,4 +120,5 @@ h1 {
 #open-credits { background: #333; color: white; border: 1px solid #555; padding: 5px 15px; cursor: pointer; border-radius: 6px; font-size: 0.7em; }
 .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); }
 .modal-content { background: #1a1a1a; margin: 5% auto; padding: 30px; width: 500px; border-radius: 20px; position: relative; font-family: 'Emiliosans'; font-size: 1.5em; }
+
 .close-modal { position: absolute; top: 10px; right: 20px; font-size: 25px; cursor: pointer; color: #ff4d4d; }
