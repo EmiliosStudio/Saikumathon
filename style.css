@@ -1,0 +1,123 @@
+@font-face {
+    font-family: 'Emiliosans';
+    src: url('./Emiliosans-Regular.ttf') format('truetype');
+}
+
+body {
+    background-color: #121212;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    font-family: sans-serif;
+    overflow: hidden;
+}
+
+h1 {
+    font-family: 'Emiliosans', sans-serif;
+    font-size: 2.5em; 
+    margin: 0 0 10px 0;
+}
+
+#game-container {
+    padding: 10px;
+    background: #2b1d0e;
+    border-radius: 8px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.8);
+}
+
+.game-layout {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+/* TABLERO CON MARGEN PARA TUS NÚMEROS */
+#board {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+    background-image: url('./tableros/tablero_numerado.png');
+    background-size: 100% 100%;
+    width: 400px;
+    height: 400px;
+    border: 2px solid #000;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    padding: 20px; /* Ajusta este valor si las piezas no caen en el centro de tu dibujo */
+}
+
+/* CASILLAS */
+.square {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+/* PIEZAS AL LÍMITE */
+.piece {
+    width: 95%;
+    height: 95%;
+    object-fit: contain;
+    display: block;
+    filter: drop-shadow(0px 3px 4px rgba(0,0,0,0.6));
+    z-index: 2;
+    transition: filter 0.3s;
+}
+
+/* INDICADORES ESTILO CHESS.COM */
+.move-indicator {
+    position: absolute;
+    width: 30%;
+    height: 30%;
+    background-color: rgba(100, 100, 100, 0.5);
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.capture-indicator {
+    position: absolute;
+    width: 85%;
+    height: 85%;
+    border: 5px solid rgba(100, 100, 100, 0.4);
+    border-radius: 50%;
+    z-index: 1;
+    box-sizing: border-box;
+}
+
+.selected-square {
+    background-color: rgba(255, 255, 0, 0.3) !important;
+}
+
+/* JAQUE Y ERRORES */
+.check-square {
+    background-color: rgba(255, 0, 0, 0.6) !important;
+    box-shadow: inset 0 0 15px #ff0000;
+}
+
+.illegal-move-animation {
+    animation: wobble 0.4s ease-in-out;
+    filter: drop-shadow(0px 0px 15px red) sepia(1) saturate(5) !important;
+}
+
+@keyframes wobble {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    50% { transform: translateX(6px); }
+    75% { transform: translateX(-3px); }
+    100% { transform: translateX(0); }
+}
+
+/* INFO Y MODAL */
+#info-panel { font-family: 'Emiliosans'; max-width: 500px; font-size: 2.2em; line-height: 1.2; }
+.footer { margin-top: 15px; display: flex; align-items: center; gap: 20px; font-family: 'Emiliosans'; font-size: 1.8em; }
+#open-credits { background: #333; color: white; border: 1px solid #555; padding: 5px 15px; cursor: pointer; border-radius: 6px; font-size: 0.7em; }
+.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); }
+.modal-content { background: #1a1a1a; margin: 5% auto; padding: 30px; width: 500px; border-radius: 20px; position: relative; font-family: 'Emiliosans'; font-size: 1.5em; }
+.close-modal { position: absolute; top: 10px; right: 20px; font-size: 25px; cursor: pointer; color: #ff4d4d; }
