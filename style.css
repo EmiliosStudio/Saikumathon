@@ -146,9 +146,11 @@ button:hover { background: #444; }
     padding: 50px 30px 25px;
 }
 #pdf-canvas {
-    width: 100%;
+    max-width: 50%;
     height: auto;
     border-radius: 8px;
+    display: block;
+    margin: 0 auto;
 }
 .pdf-nav {
     display: flex;
@@ -170,5 +172,3 @@ button:hover { background: #444; }
 }
 .pdf-nav button:hover { background: #555; }
 .pdf-nav button:disabled { opacity: 0.3; cursor: default; }
-
-
