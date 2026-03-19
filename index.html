@@ -7,27 +7,59 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
+
+    <!-- PANTALLA DE INICIO -->
+    <div id="start-screen">
+        <div class="start-box">
+            <h1 class="start-title">Saikumathon</h1>
+            <p class="start-subtitle">Elige entre...</p>
+            <div class="mode-row">
+                <button class="mode-btn" id="btn-sin-tiempo">Jugar sin tiempo</button>
+                <div class="con-tiempo-col">
+                    <button class="mode-btn" id="btn-con-tiempo">Jugar con tiempo</button>
+                    <div id="time-options" class="time-options-disabled">
+                        <div class="time-grid">
+                            <button class="time-btn" data-time="60">1m</button>
+                            <button class="time-btn" data-time="300">5m</button>
+                            <button class="time-btn" data-time="600">10m</button>
+                            <button class="time-btn" data-time="900">15m</button>
+                            <button class="time-btn" data-time="1800">30m</button>
+                            <button class="time-btn" data-time="3600">1h</button>
+                        </div>
+                        <p class="inc-label">Incremento</p>
+                        <div class="inc-row">
+                            <span>0s</span>
+                            <input type="range" id="increment-slider" min="0" max="15" value="0" step="1">
+                            <span>15s</span>
+                        </div>
+                        <p id="inc-value">0s</p>
+                    </div>
+                </div>
+            </div>
+            <button id="btn-empezar">Empezar</button>
+        </div>
+    </div>
+
+    <!-- JUEGO (oculto hasta empezar) -->
+    <header id="game-header" style="display:none">
         <h1>Saikumathon Online</h1>
     </header>
-    
-    <main id="game-container">
+
+    <main id="game-container" style="display:none">
         <div class="game-layout">
+            <div class="timers-col">
+                <div id="timer-negra" class="timer-box">0:00</div>
+                <div id="timer-blanca" class="timer-box">0:00</div>
+            </div>
             <div id="board"></div>
-            
             <aside id="info-panel">
-                <p>
-                    Bienvenido al <strong>Saikumathon Online</strong>, una evolución del ajedrez en un campo de <strong>10x10</strong>, en el que 
-                   desde un peón más veloz, hasta el perro guardián, una pieza que defiende todo el reinado.
-                </p>
-                <p>
-                    <br><em>Todavía está por construirse.</em>
-                </p>
+                <p>Bienvenido al <strong>Saikumathon Online</strong>, una evolución del ajedrez en un campo de <strong>10x10</strong>, en el que desde un peón más veloz, hasta el perro guardián, una pieza que defiende todo el reinado.</p>
+                <p><br><em>Todavía está por construirse.</em></p>
             </aside>
         </div>
     </main>
 
-    <footer class="footer">
+    <footer class="footer" id="game-footer" style="display:none">
         <span>Emilio's Studio - 2026</span>
         <div class="button-group">
             <button id="open-how-to">Cómo mover</button>
@@ -51,7 +83,7 @@
         </div>
     </div>
 
-    <!-- Modal Cómo mover (visor PDF) -->
+    <!-- Modal Cómo mover -->
     <div id="how-to-modal" class="modal">
         <div class="modal-content pdf-modal-content">
             <span class="close-modal" id="close-how-to">&times;</span>
