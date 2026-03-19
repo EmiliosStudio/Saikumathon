@@ -9,21 +9,61 @@ document.addEventListener("DOMContentLoaded", () => {
         jaque: new Audio(`${ASSETS_URL}jaque.mp3`)
     };
 
+    // --- ESTADO DEL JUEGO ---
     let currentPlayer = 'blanca';
     let selectedPiece = null;
     let possibleMoves = [];
     const boardState = Array(10).fill(null).map(() => Array(10).fill(null));
     const pawnMoved = Array(10).fill(null).map(() => Array(10).fill(false));
 
+    // --- CONFIG DE PARTIDA ---
+    let gameMode = 'sin-tiempo';
+    let timePerPlayer = 0;
+    let incrementSecs = 0;
+    let timers = { blanca: 0, negra: 0 };
+    let timerInterval = null;
+
     const pieceOrder = ["torre", "caballo", "perro", "alfil", "rey", "dama", "alfil", "perro", "caballo", "torre"];
+
+    // --- TEMPORIZADORES ---
+    function formatTime(s) {
+        const m = Math.floor(s / 60);
+        const sec = s % 60;
+        return `${m}:${sec.toString().padStart(2, '0')}`;
+    }
+
+    function updateTimerDisplay() {
+        document.getElementById('timer-negra').textContent = formatTime(timers.negra);
+        document.getElementById('timer-blanca').textContent = formatTime(timers.blanca);
+        document.getElementById('timer-negra').classList.toggle('timer-active', currentPlayer === 'negra');
+        document.getElementById('timer-blanca').classList.toggle('timer-active', currentPlayer === 'blanca');
+    }
+
+    function stopTimer() {
+        if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    }
+
+    function startTimer() {
+        if (gameMode !== 'con-tiempo') return;
+        stopTimer();
+        timerInterval = setInterval(() => {
+            timers[currentPlayer]--;
+            updateTimerDisplay();
+            if (timers[currentPlayer] <= 0) {
+                timers[currentPlayer] = 0;
+                updateTimerDisplay();
+                stopTimer();
+                const winner = currentPlayer === 'blanca' ? 'Negras' : 'Blancas';
+                setTimeout(() => alert(`¡Tiempo agotado! ${winner} ganan.`), 100);
+            }
+        }, 1000);
+    }
 
     // --- SISTEMA DE JAQUE ---
     function findKing(color, board) {
-        for (let r = 0; r < 10; r++) {
-            for (let c = 0; c < 10; c++) {
+        for (let r = 0; r < 10; r++)
+            for (let c = 0; c < 10; c++)
                 if (board[r][c]?.type === 'rey' && board[r][c]?.color === color) return { r, c };
-            }
-        }
         return null;
     }
 
@@ -31,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const kingPos = findKing(color, board);
         if (!kingPos) return false;
         const enemyColor = color === 'blanca' ? 'negra' : 'blanca';
-        for (let r = 0; r < 10; r++) {
+        for (let r = 0; r < 10; r++)
             for (let c = 0; c < 10; c++) {
                 const p = board[r][c];
                 if (p && p.color === enemyColor) {
@@ -39,11 +79,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (moves.some(m => m.row === kingPos.r && m.col === kingPos.c)) return true;
                 }
             }
-        }
         return false;
     }
 
-    // --- REGLAS DE MOVIMIENTO SAIKUMATHON ---
+    // --- REGLAS DE MOVIMIENTO ---
     function calculateMoves(row, col, type, color, board, isSimulation = false) {
         let moves = [];
         const getAt = (r, c) => (r < 0 || r >= 10 || c < 0 || c >= 10) ? 'out' : board[r][c];
@@ -51,10 +90,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (type === 'peon') {
             const dir = color === 'blanca' ? -1 : 1;
             if (getAt(row + dir, col) === null) {
-                moves.push({ row: row + dir, col: col, isCapture: false });
+                moves.push({ row: row + dir, col, isCapture: false });
                 if (!pawnMoved[row][col] && getAt(row + dir * 2, col) === null) {
-                    moves.push({ row: row + dir * 2, col: col, isCapture: false });
-                    if (getAt(row + dir * 3, col) === null) moves.push({ row: row + dir * 3, col: col, isCapture: false });
+                    moves.push({ row: row + dir * 2, col, isCapture: false });
+                    if (getAt(row + dir * 3, col) === null) moves.push({ row: row + dir * 3, col, isCapture: false });
                 }
             }
             [-1, 1].forEach(dc => {
@@ -63,31 +102,30 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        if (type === 'caballo') { // Salto 2x2
-            [[2,2], [2,-2], [-2,2], [-2,-2]].forEach(([dr, dc]) => {
+        if (type === 'caballo') {
+            [[2,2],[2,-2],[-2,2],[-2,-2]].forEach(([dr, dc]) => {
                 const t = getAt(row + dr, col + dc);
                 if (t !== 'out' && (t === null || t.color !== color)) moves.push({ row: row + dr, col: col + dc, isCapture: t !== null });
             });
         }
 
-        if (type === 'perro') { // 1 o 2 pasos (no salta)
-            [[1,0], [-1,0], [0,1], [0,-1]].forEach(([dr, dc]) => {
-                const step1 = getAt(row + dr, col + dc);
-                if (step1 !== 'out') {
-                    if (step1 === null || step1.color !== color) moves.push({ row: row + dr, col: col + dc, isCapture: step1 !== null });
-                    if (step1 === null) {
-                        const step2 = getAt(row + dr * 2, col + dc * 2);
-                        if (step2 !== 'out' && (step2 === null || step2.color !== color)) moves.push({ row: row + dr * 2, col: col + dc * 2, isCapture: step2 !== null });
+        if (type === 'perro') {
+            [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dr, dc]) => {
+                const s1 = getAt(row + dr, col + dc);
+                if (s1 !== 'out') {
+                    if (s1 === null || s1.color !== color) moves.push({ row: row + dr, col: col + dc, isCapture: s1 !== null });
+                    if (s1 === null) {
+                        const s2 = getAt(row + dr * 2, col + dc * 2);
+                        if (s2 !== 'out' && (s2 === null || s2.color !== color)) moves.push({ row: row + dr * 2, col: col + dc * 2, isCapture: s2 !== null });
                     }
                 }
             });
         }
 
         if (type === 'torre' || type === 'dama') {
-            [[1,0], [-1,0], [0,1], [0,-1]].forEach(([dr, dc]) => {
+            [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dr, dc]) => {
                 for (let i = 1; i < 10; i++) {
-                    const nr = row + dr * i, nc = col + dc * i;
-                    const t = getAt(nr, nc);
+                    const nr = row + dr * i, nc = col + dc * i, t = getAt(nr, nc);
                     if (t === 'out') break;
                     if (t === null) moves.push({ row: nr, col: nc, isCapture: false });
                     else { if (t.color !== color) moves.push({ row: nr, col: nc, isCapture: true }); break; }
@@ -96,10 +134,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (type === 'alfil' || type === 'dama') {
-            [[1,1], [1,-1], [-1,1], [-1,-1]].forEach(([dr, dc]) => {
+            [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr, dc]) => {
                 for (let i = 1; i < 10; i++) {
-                    const nr = row + dr * i, nc = col + dc * i;
-                    const t = getAt(nr, nc);
+                    const nr = row + dr * i, nc = col + dc * i, t = getAt(nr, nc);
                     if (t === 'out') break;
                     if (t === null) moves.push({ row: nr, col: nc, isCapture: false });
                     else { if (t.color !== color) moves.push({ row: nr, col: nc, isCapture: true }); break; }
@@ -108,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (type === 'rey') {
-            [[1,0], [-1,0], [0,1], [0,-1], [1,1], [1,-1], [-1,1], [-1,-1]].forEach(([dr, dc]) => {
+            [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr, dc]) => {
                 const t = getAt(row + dr, col + dc);
                 if (t !== 'out' && (t === null || t.color !== color)) moves.push({ row: row + dr, col: col + dc, isCapture: t !== null });
             });
@@ -116,7 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return moves;
     }
 
-    // --- GESTIÓN DE MOVIMIENTOS ---
+    // --- MOVER PIEZA ---
     function movePiece(fromRow, fromCol, toRow, toCol) {
         const piece = boardState[fromRow][fromCol];
         const isCap = boardState[toRow][toCol] !== null;
@@ -148,7 +185,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         clearIndicators();
         selectedPiece = null;
+
+        // Incremento al jugador que acaba de mover, luego cambiar turno
+        if (gameMode === 'con-tiempo') {
+            timers[currentPlayer] += incrementSecs;
+            stopTimer();
+        }
         currentPlayer = enemy;
+        if (gameMode === 'con-tiempo') {
+            startTimer();
+            updateTimerDisplay();
+        }
         updateCheckVisuals();
     }
 
@@ -194,14 +241,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 square.dataset.row = r; square.dataset.col = c;
                 square.onclick = () => handleSquareClick(r, c, square);
 
-                let name = null, type = null, col = null;
-                if (r === 0) { name = `negra-${pieceOrder[c]}`; col = 'negra'; type = pieceOrder[c]; }
-                else if (r === 1) { name = `negra-peon`; col = 'negra'; type = 'peon'; }
-                else if (r === 8) { name = `blanca-peon`; col = 'blanca'; type = 'peon'; }
-                else if (r === 9) { name = `blanca-${pieceOrder[c]}`; col = 'blanca'; type = pieceOrder[c]; }
+                let name = null, type = null, color = null;
+                if (r === 0) { name = `negra-${pieceOrder[c]}`; color = 'negra'; type = pieceOrder[c]; }
+                else if (r === 1) { name = `negra-peon`; color = 'negra'; type = 'peon'; }
+                else if (r === 8) { name = `blanca-peon`; color = 'blanca'; type = 'peon'; }
+                else if (r === 9) { name = `blanca-${pieceOrder[c]}`; color = 'blanca'; type = pieceOrder[c]; }
 
                 if (name) {
-                    boardState[r][c] = { type, color: col };
+                    boardState[r][c] = { type, color };
                     const img = document.createElement('img');
                     img.src = `${ASSETS_URL}${name}.png`;
                     img.className = 'piece';
@@ -212,6 +259,65 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // --- PANTALLA DE INICIO ---
+    const btnSinTiempo = document.getElementById('btn-sin-tiempo');
+    const btnConTiempo = document.getElementById('btn-con-tiempo');
+    const timeOptions = document.getElementById('time-options');
+    const btnEmpezar = document.getElementById('btn-empezar');
+    const incSlider = document.getElementById('increment-slider');
+    const incValue = document.getElementById('inc-value');
+    let selectedTime = 0;
+
+    btnSinTiempo.onclick = () => {
+        gameMode = 'sin-tiempo';
+        btnSinTiempo.classList.add('active');
+        btnConTiempo.classList.remove('active');
+        timeOptions.classList.add('time-options-disabled');
+        btnEmpezar.classList.add('visible');
+    };
+
+    btnConTiempo.onclick = () => {
+        gameMode = 'con-tiempo';
+        btnConTiempo.classList.add('active');
+        btnSinTiempo.classList.remove('active');
+        timeOptions.classList.remove('time-options-disabled');
+        if (selectedTime > 0) btnEmpezar.classList.add('visible');
+        else btnEmpezar.classList.remove('visible');
+    };
+
+    document.querySelectorAll('.time-btn').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedTime = parseInt(btn.dataset.time);
+            timePerPlayer = selectedTime;
+            if (gameMode === 'con-tiempo') btnEmpezar.classList.add('visible');
+        };
+    });
+
+    incSlider.oninput = () => {
+        incrementSecs = parseInt(incSlider.value);
+        incValue.textContent = incrementSecs + 's';
+    };
+
+    btnEmpezar.onclick = () => {
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('game-header').style.display = 'block';
+        document.getElementById('game-container').style.display = 'block';
+        document.getElementById('game-footer').style.display = 'flex';
+
+        const timersCol = document.querySelector('.timers-col');
+        if (gameMode === 'con-tiempo') {
+            timers.blanca = timePerPlayer;
+            timers.negra = timePerPlayer;
+            timersCol.style.display = 'flex';
+            updateTimerDisplay();
+            startTimer(); // empiezan blancas
+        } else {
+            timersCol.style.display = 'none';
+        }
+        createBoard();
+    };
 
     // --- MODAL CRÉDITOS ---
     const creditsModal = document.getElementById("credits-modal");
@@ -219,7 +325,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("close-credits").onclick = () => creditsModal.style.display = "none";
     creditsModal.onclick = (e) => { if (e.target === creditsModal) creditsModal.style.display = "none"; };
 
-    // --- MODAL CÓMO MOVER (visor PDF con PDF.js) ---
+    // --- MODAL CÓMO MOVER ---
     const howToModal = document.getElementById("how-to-modal");
     const pdfCanvas = document.getElementById("pdf-canvas");
     const pdfCtx = pdfCanvas.getContext("2d");
@@ -228,18 +334,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const pdfNext = document.getElementById("pdf-next");
     const pdfError = document.getElementById("pdf-error");
 
-    let pdfDoc = null;
-    let pdfPage = 1;
-    let pdfLoaded = false;
-    let renderTask = null;
+    let pdfDoc = null, pdfPage = 1, pdfLoaded = false, renderTask = null;
 
-    pdfjsLib.GlobalWorkerOptions.workerSrc = "";
-    pdfjsLib.GlobalWorkerOptions.disableWorker = true;
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
     async function renderPage(num) {
         if (renderTask) renderTask.cancel();
         const page = await pdfDoc.getPage(num);
-        const scale = pdfCanvas.parentElement.clientWidth / page.getViewport({ scale: 1 }).width * 0.92;
+        const scale = pdfCanvas.parentElement.clientWidth / page.getViewport({ scale: 1 }).width * 0.46;
         const viewport = page.getViewport({ scale });
         pdfCanvas.width = viewport.width;
         pdfCanvas.height = viewport.height;
@@ -260,22 +363,22 @@ document.addEventListener("DOMContentLoaded", () => {
             pdfLoaded = true;
             await renderPage(pdfPage);
         } catch (err) {
-            console.error("Error cargando PDF:", err);
             pdfError.style.display = "block";
-            pdfError.textContent = `Error: no se encontró ${PDF_PATH} — revisa que el archivo esté subido a GitHub en esa ruta exacta.`;
+            pdfError.textContent = `Error: no se encontró el PDF en assets/como_mover_las_piezas.pdf`;
             pdfPageInfo.textContent = "— / —";
         }
     }
 
-    document.getElementById("open-how-to").onclick = async () => {
-        howToModal.style.display = "block";
-        await loadPDF();
-    };
-    document.getElementById("close-how-to").onclick = () => howToModal.style.display = "none";
-    howToModal.onclick = (e) => { if (e.target === howToModal) howToModal.style.display = "none"; };
+    function closePdfModal() {
+        howToModal.style.display = "none";
+        pdfPage = 1; pdfLoaded = false; pdfDoc = null;
+        pdfCtx.clearRect(0, 0, pdfCanvas.width, pdfCanvas.height);
+        pdfPageInfo.textContent = "1 / 1";
+    }
 
+    document.getElementById("open-how-to").onclick = async () => { howToModal.style.display = "block"; await loadPDF(); };
+    document.getElementById("close-how-to").onclick = () => closePdfModal();
+    howToModal.onclick = (e) => { if (e.target === howToModal) closePdfModal(); };
     pdfPrev.onclick = async () => { if (pdfPage > 1) { pdfPage--; await renderPage(pdfPage); } };
     pdfNext.onclick = async () => { if (pdfDoc && pdfPage < pdfDoc.numPages) { pdfPage++; await renderPage(pdfPage); } };
-
-    createBoard();
 });
