@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saikumathon Online</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Saikumathon Online</h1>
+    </header>
+    
+    <main id="game-container">
+        <div class="game-layout">
+            <div id="board"></div>
+            
+            <aside id="info-panel">
+                <p>
+                    Bienvenido al <strong>Saikumathon Online</strong>, una evolución del ajedrez en un campo de <strong>10x10</strong>, en el que 
+                   desde un peón más veloz, hasta el perro guardián, una pieza que defiende todo el reinado.
+                </p>
+                <p>
+                    <br><em>Todavía está por construirse.</em>
+                </p>
+            </aside>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <span>Emilio's Studio - 2026</span>
+        <div class="button-group">
+            <button id="open-how-to">Cómo mover</button>
+            <button id="open-credits">Créditos</button>
+        </div>
+    </footer>
+
+    <!-- Modal Créditos -->
+    <div id="credits-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="close-credits">&times;</span>
+            <h2>Créditos</h2>
+            <hr>
+            <div class="credits-list">
+                <p><strong>· Idea:</strong> Emilio's Studio</p>
+                <p><strong>· Texto:</strong> Emiliosans Regular, Sans Serif</p>
+                <p><strong>· Diseño tablero:</strong> Emilio's Studio</p>
+                <p><strong>· Programación juego online:</strong> Gemini</p>
+                <p><strong>· Diseño piezas:</strong> Gemini y Emilio's Studio</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Cómo mover (visor PDF) -->
+    <div id="how-to-modal" class="modal">
+        <div class="modal-content pdf-modal-content">
+            <span class="close-modal" id="close-how-to">&times;</span>
+            <p id="pdf-error" style="display:none;color:#ff4d4d;font-family:sans-serif;font-size:0.9em;text-align:center;padding:10px;"></p>
+            <canvas id="pdf-canvas"></canvas>
+            <div class="pdf-nav">
+                <button id="pdf-prev">&#8592;</button>
+                <span id="pdf-page-info">1 / 1</span>
+                <button id="pdf-next">&#8594;</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
