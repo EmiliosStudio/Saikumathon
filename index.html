@@ -49,7 +49,47 @@
         <div class="game-layout">
             <div class="timers-col">
                 <div id="timer-negra" class="timer-box">0:00</div>
+                <div class="side-controls">
+                    <button class="ctrl-btn" id="btn-undo-top" title="Deshacer">&#8630;</button>
+                    <button class="ctrl-btn" id="btn-play" title="Reanudar">&#9654;</button>
+                    <button class="ctrl-btn ctrl-btn-text" id="btn-edit-time" title="Editar tiempo">Editar<br>tiempo</button>
+                    <button class="ctrl-btn" id="btn-pause" title="Pausar">&#9646;&#9646;</button>
+                    <button class="ctrl-btn" id="btn-undo-bottom" title="Deshacer">&#8629;</button>
+                </div>
                 <div id="timer-blanca" class="timer-box">0:00</div>
+            </div>
+
+            <!-- Modal editar tiempo -->
+            <div id="edit-time-modal" class="modal">
+                <div class="modal-content edit-time-content">
+                    <span class="close-modal" id="close-edit-time">&times;</span>
+                    <h2 style="font-family:'Emiliosans';font-weight:normal;margin:0 0 16px">Editar tiempo</h2>
+                    <div class="edit-time-cols">
+                        <div class="edit-col">
+                            <p class="inc-label">Tiempo</p>
+                            <div class="time-grid" id="edit-time-grid">
+                                <button class="time-btn" data-time="60">1m</button>
+                                <button class="time-btn" data-time="300">5m</button>
+                                <button class="time-btn" data-time="600">10m</button>
+                                <button class="time-btn" data-time="900">15m</button>
+                                <button class="time-btn" data-time="1800">30m</button>
+                                <button class="time-btn" data-time="3600">1h</button>
+                            </div>
+                        </div>
+                        <div class="edit-col-divider"></div>
+                        <div class="edit-col">
+                            <p class="inc-label">Incremento</p>
+                            <div class="inc-row">
+                                <span>0s</span>
+                                <input type="range" id="edit-increment-slider" min="0" max="15" value="0" step="1">
+                                <span>15s</span>
+                            </div>
+                            <p id="edit-inc-value">0s</p>
+                        </div>
+                    </div>
+                    <button id="btn-apply-time">Aplicar</button>
+                    <button id="btn-quit-time">Quitar tiempo</button>
+                </div>
             </div>
             <div id="board"></div>
             <aside id="info-panel">
@@ -75,9 +115,9 @@
             <hr>
             <div class="credits-list">
                 <p><strong>· Idea:</strong> Emilio's Studio</p>
-                <p><strong>· Texto:</strong> Emiliosans Regular, Sans Serif</p>
+                <p><strong>· Texto:</strong> Emiliosans Regular y Sans Serif</p>
                 <p><strong>· Diseño tablero:</strong> Emilio's Studio</p>
-                <p><strong>· Programación juego online:</strong> Gemini</p>
+                <p><strong>· Programación juego online:</strong> Gemini y Claude</p>
                 <p><strong>· Diseño piezas:</strong> Gemini y Emilio's Studio</p>
             </div>
         </div>
