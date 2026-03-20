@@ -347,7 +347,14 @@ button:hover { background: #444; }
     border-color: white;
 }
 
-/* ===== BOTONES LATERALES ===== */
+@keyframes timer-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.25; }
+}
+
+.timer-blinking {
+    animation: timer-blink 1s ease-in-out infinite;
+}
 .side-controls {
     display: flex;
     flex-direction: column;
