@@ -369,21 +369,39 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // --- PARPADEO AL PAUSAR ---
+    function startBlink() {
+        const activeTimer = currentPlayer === 'blanca'
+            ? document.getElementById('timer-blanca')
+            : document.getElementById('timer-negra');
+        activeTimer.classList.add('timer-blinking');
+    }
+
+    function stopBlink() {
+        document.getElementById('timer-blanca').classList.remove('timer-blinking');
+        document.getElementById('timer-negra').classList.remove('timer-blinking');
+    }
+
+    function pauseWithBlink() {
+        if (gameMode !== 'con-tiempo' || timerPaused) return;
+        stopTimer();
+        timerPaused = true;
+        startBlink();
+    }
+
+    function resumeFromBlink() {
+        if (gameMode !== 'con-tiempo' || !timerPaused) return;
+        stopBlink();
+        timerPaused = false;
+        startTimer();
+    }
+
     // --- BOTONES LATERALES ---
     document.getElementById('btn-undo-top').onclick = undoMove;
     document.getElementById('btn-undo-bottom').onclick = undoMove;
 
-    document.getElementById('btn-pause').onclick = () => {
-        if (gameMode !== 'con-tiempo' || timerPaused) return;
-        stopTimer();
-        timerPaused = true;
-    };
-
-    document.getElementById('btn-play').onclick = () => {
-        if (gameMode !== 'con-tiempo' || !timerPaused) return;
-        timerPaused = false;
-        startTimer();
-    };
+    document.getElementById('btn-pause').onclick = () => pauseWithBlink();
+    document.getElementById('btn-play').onclick = () => resumeFromBlink();
 
     // --- MODAL EDITAR TIEMPO ---
     const editTimeModal = document.getElementById('edit-time-modal');
@@ -393,7 +411,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById('btn-edit-time').onclick = () => {
         if (gameMode !== 'con-tiempo') return;
-        stopTimer(); timerPaused = true;
+        pauseWithBlink();
         editSelectedTime = 0;
         editIncSlider.value = incrementSecs;
         editIncValue.textContent = incrementSecs + 's';
@@ -403,12 +421,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById('close-edit-time').onclick = () => {
         editTimeModal.style.display = 'none';
-        if (!timerPaused) return;
-        timerPaused = false;
-        if (gameMode === 'con-tiempo') startTimer();
+        resumeFromBlink();
     };
     editTimeModal.onclick = (e) => {
-        if (e.target === editTimeModal) document.getElementById('close-edit-time').click();
+        if (e.target === editTimeModal) {
+            editTimeModal.style.display = 'none';
+            resumeFromBlink();
+        }
     };
 
     editIncSlider.oninput = () => {
@@ -432,6 +451,7 @@ document.addEventListener("DOMContentLoaded", () => {
         incrementSecs = parseInt(editIncSlider.value);
         updateTimerDisplay();
         editTimeModal.style.display = 'none';
+        stopBlink();
         timerPaused = false;
         startTimer();
     };
@@ -446,9 +466,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- MODAL CRÉDITOS ---
     const creditsModal = document.getElementById("credits-modal");
-    document.getElementById("open-credits").onclick = () => creditsModal.style.display = "block";
-    document.getElementById("close-credits").onclick = () => creditsModal.style.display = "none";
-    creditsModal.onclick = (e) => { if (e.target === creditsModal) creditsModal.style.display = "none"; };
+    document.getElementById("open-credits").onclick = () => {
+        creditsModal.style.display = "block";
+        pauseWithBlink();
+    };
+    document.getElementById("close-credits").onclick = () => {
+        creditsModal.style.display = "none";
+        resumeFromBlink();
+    };
+    creditsModal.onclick = (e) => {
+        if (e.target === creditsModal) {
+            creditsModal.style.display = "none";
+            resumeFromBlink();
+        }
+    };
 
     // --- MODAL CÓMO MOVER ---
     const howToModal = document.getElementById("how-to-modal");
@@ -501,9 +532,21 @@ document.addEventListener("DOMContentLoaded", () => {
         pdfPageInfo.textContent = "1 / 1";
     }
 
-    document.getElementById("open-how-to").onclick = async () => { howToModal.style.display = "block"; await loadPDF(); };
-    document.getElementById("close-how-to").onclick = () => closePdfModal();
-    howToModal.onclick = (e) => { if (e.target === howToModal) closePdfModal(); };
+    document.getElementById("open-how-to").onclick = async () => {
+        howToModal.style.display = "block";
+        pauseWithBlink();
+        await loadPDF();
+    };
+    document.getElementById("close-how-to").onclick = () => {
+        closePdfModal();
+        resumeFromBlink();
+    };
+    howToModal.onclick = (e) => {
+        if (e.target === howToModal) {
+            closePdfModal();
+            resumeFromBlink();
+        }
+    };
     pdfPrev.onclick = async () => { if (pdfPage > 1) { pdfPage--; await renderPage(pdfPage); } };
     pdfNext.onclick = async () => { if (pdfDoc && pdfPage < pdfDoc.numPages) { pdfPage++; await renderPage(pdfPage); } };
 });
