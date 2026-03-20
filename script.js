@@ -61,6 +61,37 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 1000);
     }
 
+    function hasLegalMoves(color, board) {
+        for (let r = 0; r < 10; r++) {
+            for (let c = 0; c < 10; c++) {
+                const p = board[r][c];
+                if (!p || p.color !== color) continue;
+                const moves = calculateMoves(r, c, p.type, p.color, board);
+                for (const m of moves) {
+                    const virtual = board.map(row => [...row]);
+                    virtual[m.row][m.col] = p;
+                    virtual[r][c] = null;
+                    if (!isKingInCheck(color, virtual)) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    function checkGameOver() {
+        const enemy = currentPlayer === 'blanca' ? 'negra' : 'blanca';
+        if (!hasLegalMoves(currentPlayer, boardState)) {
+            stopTimer();
+            timerPaused = true;
+            if (isKingInCheck(currentPlayer, boardState)) {
+                const winner = currentPlayer === 'blanca' ? 'Negras' : 'Blancas';
+                setTimeout(() => alert(`¡Jaque mate! ${winner} ganan.`), 200);
+            } else {
+                setTimeout(() => alert('¡Ahogado! La partida termina en tablas.'), 200);
+            }
+        }
+    }
+
     // --- SISTEMA DE JAQUE ---
     function findKing(color, board) {
         for (let r = 0; r < 10; r++)
@@ -207,6 +238,7 @@ document.addEventListener("DOMContentLoaded", () => {
             updateTimerDisplay();
         }
         updateCheckVisuals();
+        checkGameOver();
     }
 
     function updateCheckVisuals() {
@@ -514,7 +546,7 @@ document.addEventListener("DOMContentLoaded", () => {
         pdfError.style.display = "none";
         pdfPageInfo.textContent = "Cargando...";
         try {
-            const PDF_PATH = "./assets/como_mover_las_piezas.pdf";
+            const PDF_PATH = "./assets/como_mover_las_piezas.pdf?v=" + Date.now();
             pdfDoc = await pdfjsLib.getDocument(PDF_PATH).promise;
             pdfLoaded = true;
             await renderPage(pdfPage);
