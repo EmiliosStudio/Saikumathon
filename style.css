@@ -346,3 +346,110 @@ button:hover { background: #444; }
     color: #1a1a1a;
     border-color: white;
 }
+
+/* ===== BOTONES LATERALES ===== */
+.side-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    justify-content: center;
+}
+
+.ctrl-btn {
+    width: 54px;
+    height: 54px;
+    background: #1a1a1a;
+    color: white;
+    border: 2px solid #444;
+    border-radius: 10px;
+    font-size: 1.4em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+    font-family: sans-serif;
+    padding: 0;
+    line-height: 1;
+}
+
+.ctrl-btn:hover { background: #333; border-color: #666; }
+.ctrl-btn:active { background: #444; transform: scale(0.96); }
+
+.ctrl-btn-text {
+    font-family: 'Emiliosans';
+    font-size: 0.95em;
+    line-height: 1.2;
+    text-align: center;
+}
+
+/* Modal editar tiempo */
+.edit-time-content {
+    text-align: center;
+    color: white;
+}
+
+.edit-time-cols {
+    display: flex;
+    gap: 0;
+    align-items: flex-start;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.edit-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 24px;
+    gap: 8px;
+}
+
+.edit-col-divider {
+    width: 1px;
+    background: rgba(255,255,255,0.2);
+    align-self: stretch;
+    margin: 0 4px;
+}
+
+.inc-row-vertical {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: white;
+    font-family: 'Emiliosans';
+    font-size: 0.95em;
+}
+
+.inc-row-vertical input[type=range] {
+    width: 130px;
+    cursor: pointer;
+}
+
+#btn-apply-time {
+    font-family: 'Emiliosans';
+    font-size: 1.1em;
+    margin-top: 8px;
+    background: #1a1a1a;
+    color: white;
+    border: 1px solid #555;
+    padding: 8px 28px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+#btn-apply-time:hover { background: #333; }
+
+#btn-quit-time {
+    font-family: 'Emiliosans';
+    font-size: 1em;
+    margin-top: 6px;
+    background: transparent;
+    color: #ff4d4d;
+    border: 1px solid #ff4d4d44;
+    padding: 6px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+#btn-quit-time:hover { background: rgba(255,77,77,0.1); }
