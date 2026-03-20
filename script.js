@@ -15,6 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let possibleMoves = [];
     const boardState = Array(10).fill(null).map(() => Array(10).fill(null));
     const pawnMoved = Array(10).fill(null).map(() => Array(10).fill(false));
+    let moveHistory = []; // historial para undo
+    let timerPaused = false;
 
     // --- CONFIG DE PARTIDA ---
     let gameMode = 'sin-tiempo';
@@ -170,6 +172,14 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        // Guardar snapshot para undo
+        moveHistory.push({
+            board: boardState.map(r => r.map(c => c ? {...c} : null)),
+            pawnMoved: pawnMoved.map(r => [...r]),
+            currentPlayer,
+            timers: { ...timers }
+        });
+
         if (piece.type === 'peon') pawnMoved[fromRow][fromCol] = true;
         boardState[toRow][toCol] = piece;
         boardState[fromRow][fromCol] = null;
@@ -317,6 +327,121 @@ document.addEventListener("DOMContentLoaded", () => {
             timersCol.style.display = 'none';
         }
         createBoard();
+    };
+
+    // --- UNDO ---
+    function undoMove() {
+        if (moveHistory.length === 0) return;
+        const snap = moveHistory.pop();
+        // Restaurar estado
+        for (let r = 0; r < 10; r++)
+            for (let c = 0; c < 10; c++) {
+                boardState[r][c] = snap.board[r][c];
+                pawnMoved[r][c] = snap.pawnMoved[r][c];
+            }
+        currentPlayer = snap.currentPlayer;
+        timers = { ...snap.timers };
+        stopTimer();
+        timerPaused = false;
+        if (gameMode === 'con-tiempo') { startTimer(); updateTimerDisplay(); }
+        selectedPiece = null; possibleMoves = [];
+        rebuildBoard();
+        updateCheckVisuals();
+    }
+
+    function rebuildBoard() {
+        boardElement.innerHTML = '';
+        for (let r = 0; r < 10; r++) {
+            for (let c = 0; c < 10; c++) {
+                const square = document.createElement('div');
+                square.className = 'square';
+                square.dataset.row = r; square.dataset.col = c;
+                square.onclick = () => handleSquareClick(r, c, square);
+                const p = boardState[r][c];
+                if (p) {
+                    const img = document.createElement('img');
+                    img.src = `${ASSETS_URL}${p.color}-${p.type}.png`;
+                    img.className = 'piece';
+                    square.appendChild(img);
+                }
+                boardElement.appendChild(square);
+            }
+        }
+    }
+
+    // --- BOTONES LATERALES ---
+    document.getElementById('btn-undo-top').onclick = undoMove;
+    document.getElementById('btn-undo-bottom').onclick = undoMove;
+
+    document.getElementById('btn-pause').onclick = () => {
+        if (gameMode !== 'con-tiempo' || timerPaused) return;
+        stopTimer();
+        timerPaused = true;
+    };
+
+    document.getElementById('btn-play').onclick = () => {
+        if (gameMode !== 'con-tiempo' || !timerPaused) return;
+        timerPaused = false;
+        startTimer();
+    };
+
+    // --- MODAL EDITAR TIEMPO ---
+    const editTimeModal = document.getElementById('edit-time-modal');
+    const editIncSlider = document.getElementById('edit-increment-slider');
+    const editIncValue = document.getElementById('edit-inc-value');
+    let editSelectedTime = 0;
+
+    document.getElementById('btn-edit-time').onclick = () => {
+        if (gameMode !== 'con-tiempo') return;
+        stopTimer(); timerPaused = true;
+        editSelectedTime = 0;
+        editIncSlider.value = incrementSecs;
+        editIncValue.textContent = incrementSecs + 's';
+        document.querySelectorAll('#edit-time-grid .time-btn').forEach(b => b.classList.remove('active'));
+        editTimeModal.style.display = 'block';
+    };
+
+    document.getElementById('close-edit-time').onclick = () => {
+        editTimeModal.style.display = 'none';
+        if (!timerPaused) return;
+        timerPaused = false;
+        if (gameMode === 'con-tiempo') startTimer();
+    };
+    editTimeModal.onclick = (e) => {
+        if (e.target === editTimeModal) document.getElementById('close-edit-time').click();
+    };
+
+    editIncSlider.oninput = () => {
+        editIncValue.textContent = editIncSlider.value + 's';
+    };
+
+    document.querySelectorAll('#edit-time-grid .time-btn').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('#edit-time-grid .time-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            editSelectedTime = parseInt(btn.dataset.time);
+        };
+    });
+
+    document.getElementById('btn-apply-time').onclick = () => {
+        if (editSelectedTime > 0) {
+            timers.blanca = editSelectedTime;
+            timers.negra = editSelectedTime;
+            timePerPlayer = editSelectedTime;
+        }
+        incrementSecs = parseInt(editIncSlider.value);
+        updateTimerDisplay();
+        editTimeModal.style.display = 'none';
+        timerPaused = false;
+        startTimer();
+    };
+
+    document.getElementById('btn-quit-time').onclick = () => {
+        stopTimer();
+        gameMode = 'sin-tiempo';
+        document.querySelector('.timers-col').style.display = 'none';
+        editTimeModal.style.display = 'none';
+        timerPaused = false;
     };
 
     // --- MODAL CRÉDITOS ---
