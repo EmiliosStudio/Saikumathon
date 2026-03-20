@@ -124,12 +124,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (type === 'peon') {
             const dir = color === 'blanca' ? -1 : 1;
-            if (getAt(row + dir, col) === null) {
-                moves.push({ row: row + dir, col, isCapture: false });
-                if (!pawnMoved[row][col] && getAt(row + dir * 2, col) === null) {
-                    moves.push({ row: row + dir * 2, col, isCapture: false });
-                    if (getAt(row + dir * 3, col) === null) moves.push({ row: row + dir * 3, col, isCapture: false });
-                }
+            const filaInicial = color === 'blanca' ? 8 : 1;
+            const pasos = row === filaInicial ? 3 : 1;
+            for (let i = 1; i <= pasos; i++) {
+                const t = getAt(row + dir * i, col);
+                if (t === null) moves.push({ row: row + dir * i, col, isCapture: false });
+                else break;
             }
             [-1, 1].forEach(dc => {
                 const t = getAt(row + dir, col + dc);
@@ -213,7 +213,6 @@ document.addEventListener("DOMContentLoaded", () => {
             timers: { ...timers }
         });
 
-        if (piece.type === 'peon') pawnMoved[fromRow][fromCol] = true;
         boardState[toRow][toCol] = piece;
         boardState[fromRow][fromCol] = null;
 
