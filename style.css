@@ -460,3 +460,17 @@ button:hover { background: #444; }
     cursor: pointer;
 }
 #btn-quit-time:hover { background: rgba(255,77,77,0.1); }
+
+/* MODAL FIN DE PARTIDA */
+.gameover-content {
+    text-align: center;
+    padding: 40px 50px;
+}
+
+#gameover-msg {
+    font-family: 'Emiliosans';
+    font-size: 2em;
+    color: white;
+    margin: 0;
+    line-height: 1.4;
+}
