@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 updateTimerDisplay();
                 stopTimer();
                 const winner = currentPlayer === 'blanca' ? 'Negras' : 'Blancas';
-                setTimeout(() => alert(`¡Tiempo agotado! ${winner} ganan.`), 100);
+                showGameOver(`¡Tiempo agotado!\n${winner} ganan.`);
             }
         }, 1000);
     }
@@ -80,16 +80,22 @@ document.addEventListener("DOMContentLoaded", () => {
         return false;
     }
 
+    function showGameOver(msg) {
+        stopTimer();
+        timerPaused = true;
+        const modal = document.getElementById('gameover-modal');
+        document.getElementById('gameover-msg').textContent = msg;
+        setTimeout(() => { modal.style.display = 'block'; }, 200);
+        modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+    }
+
     function checkGameOver() {
-        const enemy = currentPlayer === 'blanca' ? 'negra' : 'blanca';
         if (!hasLegalMoves(currentPlayer, boardState)) {
-            stopTimer();
-            timerPaused = true;
             if (isKingInCheck(currentPlayer, boardState)) {
                 const winner = currentPlayer === 'blanca' ? 'Negras' : 'Blancas';
-                setTimeout(() => alert(`¡Jaque mate! ${winner} ganan.`), 200);
+                showGameOver(`¡Jaque mate!\n${winner} ganan.`);
             } else {
-                setTimeout(() => alert('¡Ahogado! La partida termina en tablas.'), 200);
+                showGameOver('¡Ahogado!\nTablas.');
             }
         }
     }
