@@ -100,6 +100,56 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function setupDrag(square, r, c) {
+        const img = square.querySelector('.piece');
+        if (!img) return;
+
+        // HTML5 drag (escritorio)
+        img.draggable = true;
+        img.addEventListener('dragstart', (e) => {
+            const p = boardState[r][c];
+            if (!p || p.color !== currentPlayer) { e.preventDefault(); return; }
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', `${r},${c}`);
+            setTimeout(() => img.classList.add('dragging'), 0);
+            selectedPiece = { row: r, col: c };
+            possibleMoves = calculateMoves(r, c, p.type, p.color, boardState);
+            clearIndicators();
+            square.classList.add('selected-square');
+            possibleMoves.forEach(m => {
+                const target = document.querySelector(`.square[data-row='${m.row}'][data-col='${m.col}']`);
+                const ind = document.createElement('div');
+                ind.className = m.isCapture ? 'capture-indicator' : 'move-indicator';
+                target.appendChild(ind);
+            });
+        });
+        img.addEventListener('dragend', () => {
+            img.classList.remove('dragging');
+        });
+    }
+
+    function setupDropZone(square, r, c) {
+        square.addEventListener('dragover', (e) => {
+            if (!selectedPiece) return;
+            const isValid = possibleMoves.find(m => m.row === r && m.col === c);
+            if (isValid) {
+                e.preventDefault();
+                square.classList.add('drag-over');
+            }
+        });
+        square.addEventListener('dragleave', () => {
+            square.classList.remove('drag-over');
+        });
+        square.addEventListener('drop', (e) => {
+            e.preventDefault();
+            square.classList.remove('drag-over');
+            if (!selectedPiece) return;
+            const move = possibleMoves.find(m => m.row === r && m.col === c);
+            if (move) movePiece(selectedPiece.row, selectedPiece.col, r, c);
+            else { clearIndicators(); selectedPiece = null; }
+        });
+    }
+
     // --- SISTEMA DE JAQUE ---
     function findKing(color, board) {
         for (let r = 0; r < 10; r++)
@@ -226,6 +276,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const img = document.querySelector(`.square[data-row='${fromRow}'][data-col='${fromCol}'] .piece`);
         toSq.innerHTML = '';
         toSq.appendChild(img);
+        setupDrag(toSq, toRow, toCol);
+        const fromSq = document.querySelector(`.square[data-row='${fromRow}'][data-col='${fromCol}']`);
+        setupDrag(fromSq, fromRow, fromCol);
 
         const enemy = currentPlayer === 'blanca' ? 'negra' : 'blanca';
         if (isKingInCheck(enemy, boardState)) sounds.jaque.play();
@@ -304,6 +357,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     img.className = 'piece';
                     square.appendChild(img);
                 }
+                setupDropZone(square, r, c);
+                setupDrag(square, r, c);
                 boardElement.appendChild(square);
             }
         }
@@ -405,6 +460,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     img.className = 'piece';
                     square.appendChild(img);
                 }
+                setupDropZone(square, r, c);
+                setupDrag(square, r, c);
                 boardElement.appendChild(square);
             }
         }
