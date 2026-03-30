@@ -27,7 +27,27 @@ document.addEventListener("DOMContentLoaded", () => {
     let timers = { blanca: 0, negra: 0 };
     let timerInterval = null;
 
+    // --- PIEZAS CAPTURADAS ---
+    const captured = { blanca: [], negra: [] }; // capturadas POR ese color
     const pieceOrder = ["torre", "caballo", "perro", "alfil", "rey", "dama", "alfil", "perro", "caballo", "torre"];
+    const captureOrder = ['peon', 'perro', 'caballo', 'alfil', 'torre', 'dama', 'rey'];
+
+    function renderCaptured() {
+        ['blanca', 'negra'].forEach(color => {
+            const el = document.getElementById(`captured-${color}`);
+            el.innerHTML = '';
+            const sorted = [...captured[color]].sort((a, b) =>
+                captureOrder.indexOf(a) - captureOrder.indexOf(b)
+            );
+            const enemy = color === 'blanca' ? 'negra' : 'blanca';
+            sorted.forEach(type => {
+                const img = document.createElement('img');
+                img.src = `${ASSETS_URL}${enemy}-${type}.png`;
+                img.className = 'captured-piece';
+                el.appendChild(img);
+            });
+        });
+    }
 
     // --- TEMPORIZADORES ---
     function formatTime(s) {
@@ -248,6 +268,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function movePiece(fromRow, fromCol, toRow, toCol) {
         const piece = boardState[fromRow][fromCol];
         const isCap = boardState[toRow][toCol] !== null;
+        const capturedPiece = boardState[toRow][toCol];
 
         const virtualBoard = boardState.map(r => [...r]);
         virtualBoard[toRow][toCol] = piece;
@@ -266,9 +287,11 @@ document.addEventListener("DOMContentLoaded", () => {
             board: boardState.map(r => r.map(c => c ? {...c} : null)),
             pawnMoved: pawnMoved.map(r => [...r]),
             currentPlayer,
-            timers: { ...timers }
+            timers: { ...timers },
+            captured: { blanca: [...captured.blanca], negra: [...captured.negra] }
         });
 
+        if (capturedPiece) captured[currentPlayer].push(capturedPiece.type);
         boardState[toRow][toCol] = piece;
         boardState[fromRow][fromCol] = null;
 
@@ -279,6 +302,7 @@ document.addEventListener("DOMContentLoaded", () => {
         setupDrag(toSq, toRow, toCol);
         const fromSq = document.querySelector(`.square[data-row='${fromRow}'][data-col='${fromCol}']`);
         setupDrag(fromSq, fromRow, fromCol);
+        renderCaptured();
 
         const enemy = currentPlayer === 'blanca' ? 'negra' : 'blanca';
         if (isKingInCheck(enemy, boardState)) sounds.jaque.play();
@@ -396,9 +420,20 @@ document.addEventListener("DOMContentLoaded", () => {
             btn.classList.add('active');
             selectedTime = parseInt(btn.dataset.time);
             timePerPlayer = selectedTime;
+            document.getElementById('custom-time-input').value = '';
             if (gameMode === 'con-tiempo') btnEmpezar.classList.add('visible');
         };
     });
+
+    document.getElementById('custom-time-input').oninput = (e) => {
+        let val = parseInt(e.target.value);
+        if (isNaN(val) || val < 1) return;
+        if (val > 60) { val = 60; e.target.value = 60; }
+        document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+        selectedTime = val * 60;
+        timePerPlayer = selectedTime;
+        if (gameMode === 'con-tiempo') btnEmpezar.classList.add('visible');
+    };
 
     incSlider.oninput = () => {
         incrementSecs = parseInt(incSlider.value);
@@ -423,6 +458,9 @@ document.addEventListener("DOMContentLoaded", () => {
             timersCol.style.display = 'none';
         }
         createBoard();
+        captured.blanca = [];
+        captured.negra = [];
+        renderCaptured();
     };
 
     // --- UNDO ---
@@ -437,11 +475,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         currentPlayer = snap.currentPlayer;
         timers = { ...snap.timers };
+        captured.blanca = [...snap.captured.blanca];
+        captured.negra = [...snap.captured.negra];
         stopTimer();
         timerPaused = false;
         if (gameMode === 'con-tiempo') { startTimer(); updateTimerDisplay(); }
         selectedPiece = null; possibleMoves = [];
         rebuildBoard();
+        renderCaptured();
         updateCheckVisuals();
     }
 
@@ -537,8 +578,17 @@ document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll('#edit-time-grid .time-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             editSelectedTime = parseInt(btn.dataset.time);
+            document.getElementById('edit-custom-time-input').value = '';
         };
     });
+
+    document.getElementById('edit-custom-time-input').oninput = (e) => {
+        let val = parseInt(e.target.value);
+        if (isNaN(val) || val < 1) return;
+        if (val > 60) { val = 60; e.target.value = 60; }
+        document.querySelectorAll('#edit-time-grid .time-btn').forEach(b => b.classList.remove('active'));
+        editSelectedTime = val * 60;
+    };
 
     document.getElementById('btn-apply-time').onclick = () => {
         if (editSelectedTime > 0) {
