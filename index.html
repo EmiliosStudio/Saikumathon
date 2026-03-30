@@ -27,6 +27,11 @@
                             <button class="time-btn" data-time="1800">30m</button>
                             <button class="time-btn" data-time="3600">1h</button>
                         </div>
+                        <div class="custom-time-row">
+                            <span class="custom-time-label">Tiempo personalizado:</span>
+                            <input type="number" id="custom-time-input" min="1" max="60" placeholder="—">
+                            <span class="custom-time-label">min</span>
+                        </div>
                         <p class="inc-label">Incremento</p>
                         <div class="inc-row">
                             <span>0s</span>
@@ -76,6 +81,11 @@
                                 <button class="time-btn" data-time="1800">30m</button>
                                 <button class="time-btn" data-time="3600">1h</button>
                             </div>
+                            <div class="custom-time-row">
+                                <span class="custom-time-label">Personalizado:</span>
+                                <input type="number" id="edit-custom-time-input" min="1" max="60" placeholder="—">
+                                <span class="custom-time-label">min</span>
+                            </div>
                         </div>
                         <div class="edit-col-divider"></div>
                         <div class="edit-col">
@@ -92,7 +102,11 @@
                     <button id="btn-quit-time">Quitar tiempo</button>
                 </div>
             </div>
-            <div id="board"></div>
+            <div id="board-col">
+                <div id="captured-negra" class="captured-row"></div>
+                <div id="board"></div>
+                <div id="captured-blanca" class="captured-row"></div>
+            </div>
             <aside id="info-panel">
                 <p>Bienvenido al <strong>Saikumathon Online</strong>, una evolución del ajedrez en un campo de <strong>10x10</strong>, en el que desde un peón más veloz, hasta el perro guardián, una pieza que defiende todo el reinado.</p>
                 <p><br><em>Todavía está por construirse.</em></p>
