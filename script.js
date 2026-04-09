@@ -8,7 +8,8 @@ document.addEventListener("DOMContentLoaded", () => {
         captura: new Audio(`${ASSETS_URL}sounds/capturar.mp3`),
         jaque: new Audio(`${ASSETS_URL}sounds/jaque.mp3`),
         mover: new Audio(`${ASSETS_URL}sounds/mover.mp3`),
-        empezar: new Audio(`${ASSETS_URL}sounds/empezar.mp3`)
+        empezar: new Audio(`${ASSETS_URL}sounds/empezar.mp3`),
+        fin: new Audio(`${ASSETS_URL}sounds/fin.mp3`)
     };
 
     // --- ESTADO DEL JUEGO ---
@@ -17,8 +18,11 @@ document.addEventListener("DOMContentLoaded", () => {
     let possibleMoves = [];
     const boardState = Array(10).fill(null).map(() => Array(10).fill(null));
     const pawnMoved = Array(10).fill(null).map(() => Array(10).fill(false));
-    let moveHistory = []; // historial para undo
+    let moveHistory = [];
     let timerPaused = false;
+    let rotateBoard = false;
+    const kingMoved = { blanca: false, negra: false };
+    const rookMoved = { blanca: false, negra: false };
 
     // --- CONFIG DE PARTIDA ---
     let gameMode = 'sin-tiempo';
@@ -103,6 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function showGameOver(msg) {
         stopTimer();
         timerPaused = true;
+        sounds.fin.play();
         const modal = document.getElementById('gameover-modal');
         document.getElementById('gameover-msg').textContent = msg;
         setTimeout(() => { modal.style.display = 'block'; }, 200);
@@ -129,6 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
         img.addEventListener('dragstart', (e) => {
             const p = boardState[r][c];
             if (!p || p.color !== currentPlayer) { e.preventDefault(); return; }
+            if (timerPaused) resumeFromBlink();
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/plain', `${r},${c}`);
             setTimeout(() => img.classList.add('dragging'), 0);
@@ -144,7 +150,8 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
         img.addEventListener('dragend', () => {
-            img.classList.remove('dragging');
+            // Limpiar dragging de TODAS las piezas por si acaso
+            document.querySelectorAll('.piece.dragging').forEach(el => el.classList.remove('dragging'));
         });
     }
 
@@ -163,6 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
         square.addEventListener('drop', (e) => {
             e.preventDefault();
             square.classList.remove('drag-over');
+            document.querySelectorAll('.piece.dragging').forEach(el => el.classList.remove('dragging'));
             if (!selectedPiece) return;
             const move = possibleMoves.find(m => m.row === r && m.col === c);
             if (move) movePiece(selectedPiece.row, selectedPiece.col, r, c);
@@ -260,6 +268,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 const t = getAt(row + dr, col + dc);
                 if (t !== 'out' && (t === null || t.color !== color)) moves.push({ row: row + dr, col: col + dc, isCapture: t !== null });
             });
+            // Enroque con torre de columna 0
+            if (!isSimulation && !kingMoved[color] && !rookMoved[color]) {
+                const rookRow = color === 'blanca' ? 9 : 0;
+                const rook = board[rookRow][0];
+                if (rook && rook.type === 'torre' && rook.color === color) {
+                    if (!board[rookRow][1] && !board[rookRow][2] && !board[rookRow][3]) {
+                        moves.push({ row: rookRow, col: 0, isCastling: true, isCapture: false });
+                    }
+                }
+            }
         }
         return moves;
     }
@@ -292,16 +310,31 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if (capturedPiece) captured[currentPlayer].push(capturedPiece.type);
-        boardState[toRow][toCol] = piece;
-        boardState[fromRow][fromCol] = null;
 
-        const toSq = document.querySelector(`.square[data-row='${toRow}'][data-col='${toCol}']`);
-        const img = document.querySelector(`.square[data-row='${fromRow}'][data-col='${fromCol}'] .piece`);
-        toSq.innerHTML = '';
-        toSq.appendChild(img);
-        setupDrag(toSq, toRow, toCol);
-        const fromSq = document.querySelector(`.square[data-row='${fromRow}'][data-col='${fromCol}']`);
-        setupDrag(fromSq, fromRow, fromCol);
+        // Detectar enroque
+        const castlingMove = possibleMoves.find(m => m.row === toRow && m.col === toCol && m.isCastling);
+        if (castlingMove) {
+            const rookRow = currentPlayer === 'blanca' ? 9 : 0;
+            boardState[rookRow][0] = null;
+            boardState[rookRow][1] = piece;       // rey a b
+            boardState[rookRow][2] = { type: 'torre', color: currentPlayer }; // torre a c
+            boardState[fromRow][fromCol] = null;
+            kingMoved[currentPlayer] = true;
+            rookMoved[currentPlayer] = true;
+            rebuildBoard();
+        } else {
+            if (piece.type === 'rey') kingMoved[currentPlayer] = true;
+            if (piece.type === 'torre' && fromCol === 0) rookMoved[currentPlayer] = true;
+            boardState[toRow][toCol] = piece;
+            boardState[fromRow][fromCol] = null;
+            const toSq = document.querySelector(`.square[data-row='${toRow}'][data-col='${toCol}']`);
+            const img = document.querySelector(`.square[data-row='${fromRow}'][data-col='${fromCol}'] .piece`);
+            toSq.innerHTML = '';
+            toSq.appendChild(img);
+            setupDrag(toSq, toRow, toCol);
+            const fromSq = document.querySelector(`.square[data-row='${fromRow}'][data-col='${fromCol}']`);
+            setupDrag(fromSq, fromRow, fromCol);
+        }
         renderCaptured();
 
         const enemy = currentPlayer === 'blanca' ? 'negra' : 'blanca';
@@ -311,13 +344,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
         clearIndicators();
         selectedPiece = null;
+        // Asegurar que no parpadea al pasar el turno
+        stopBlink();
 
-        // Incremento al jugador que acaba de mover, luego cambiar turno
         if (gameMode === 'con-tiempo') {
             timers[currentPlayer] += incrementSecs;
             stopTimer();
         }
         currentPlayer = enemy;
+
+        // Rotación del tablero
+        if (rotateBoard) {
+            document.getElementById('board-col').classList.toggle('rotated', currentPlayer === 'negra');
+        }
+
         if (gameMode === 'con-tiempo') {
             startTimer();
             updateTimerDisplay();
@@ -341,6 +381,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         const p = boardState[row][col];
         if (p && p.color === currentPlayer) {
+            if (timerPaused) resumeFromBlink();
             clearIndicators();
             selectedPiece = { row, col, ...p };
             square.classList.add('selected-square');
@@ -402,6 +443,7 @@ document.addEventListener("DOMContentLoaded", () => {
         btnSinTiempo.classList.add('active');
         btnConTiempo.classList.remove('active');
         timeOptions.classList.add('time-options-disabled');
+        document.getElementById('custom-time-input').value = '';
         btnEmpezar.classList.add('visible');
     };
 
@@ -410,8 +452,10 @@ document.addEventListener("DOMContentLoaded", () => {
         btnConTiempo.classList.add('active');
         btnSinTiempo.classList.remove('active');
         timeOptions.classList.remove('time-options-disabled');
-        if (selectedTime > 0) btnEmpezar.classList.add('visible');
-        else btnEmpezar.classList.remove('visible');
+        document.getElementById('custom-time-input').value = '';
+        selectedTime = 0;
+        document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+        btnEmpezar.classList.remove('visible');
     };
 
     document.querySelectorAll('.time-btn').forEach(btn => {
@@ -426,9 +470,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.getElementById('custom-time-input').oninput = (e) => {
-        let val = parseInt(e.target.value);
+        let val = Math.floor(parseFloat(e.target.value));
         if (isNaN(val) || val < 1) return;
-        if (val > 60) { val = 60; e.target.value = 60; }
+        if (val > 60) val = 60;
+        e.target.value = val;
         document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
         selectedTime = val * 60;
         timePerPlayer = selectedTime;
@@ -461,6 +506,10 @@ document.addEventListener("DOMContentLoaded", () => {
         captured.blanca = [];
         captured.negra = [];
         renderCaptured();
+        rotateBoard = document.getElementById('chk-rotate').checked;
+        kingMoved.blanca = false; kingMoved.negra = false;
+        rookMoved.blanca = false; rookMoved.negra = false;
+        document.getElementById('board-col').classList.remove('rotated');
     };
 
     // --- UNDO ---
@@ -590,13 +639,29 @@ document.addEventListener("DOMContentLoaded", () => {
         editSelectedTime = val * 60;
     };
 
+    let errorTimeout = null;
     document.getElementById('btn-apply-time').onclick = () => {
+        const errEl = document.getElementById('edit-time-error');
         if (editSelectedTime > 0) {
-            timers.blanca = editSelectedTime;
-            timers.negra = editSelectedTime;
+            const tiempoGastado = timePerPlayer - Math.min(timers.blanca, timers.negra);
+            if (tiempoGastado >= editSelectedTime) {
+                if (errorTimeout) clearTimeout(errorTimeout);
+                errEl.textContent = 'Error. Selecciona un tiempo más alto o empieza una nueva partida.';
+                errEl.style.opacity = "1";
+                errorTimeout = setTimeout(() => {
+                    errEl.style.opacity = "0";
+                    errEl.textContent = '';
+                }, 7000);
+                return;
+            }
+            const nuevoRestante = editSelectedTime - tiempoGastado;
+            timers.blanca = nuevoRestante;
+            timers.negra = nuevoRestante;
             timePerPlayer = editSelectedTime;
         }
         incrementSecs = parseInt(editIncSlider.value);
+        errEl.textContent = '';
+        errEl.style.opacity = "0";
         updateTimerDisplay();
         editTimeModal.style.display = 'none';
         stopBlink();
