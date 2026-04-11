@@ -268,13 +268,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 const t = getAt(row + dr, col + dc);
                 if (t !== 'out' && (t === null || t.color !== color)) moves.push({ row: row + dr, col: col + dc, isCapture: t !== null });
             });
-            // Enroque con torre de columna 0
+            // Enroque: mostrar indicador en la casilla donde irá el rey (col 1), pero guardar isCastling
             if (!isSimulation && !kingMoved[color] && !rookMoved[color]) {
                 const rookRow = color === 'blanca' ? 9 : 0;
                 const rook = board[rookRow][0];
                 if (rook && rook.type === 'torre' && rook.color === color) {
                     if (!board[rookRow][1] && !board[rookRow][2] && !board[rookRow][3]) {
-                        moves.push({ row: rookRow, col: 0, isCastling: true, isCapture: false });
+                        // El indicador aparece en col 1 (donde irá el rey), pero marcamos isCastling
+                        moves.push({ row: rookRow, col: 1, isCastling: true, isCapture: false });
                     }
                 }
             }
@@ -306,19 +307,22 @@ document.addEventListener("DOMContentLoaded", () => {
             pawnMoved: pawnMoved.map(r => [...r]),
             currentPlayer,
             timers: { ...timers },
-            captured: { blanca: [...captured.blanca], negra: [...captured.negra] }
+            captured: { blanca: [...captured.blanca], negra: [...captured.negra] },
+            kingMoved: { ...kingMoved },
+            rookMoved: { ...rookMoved }
         });
 
-        if (capturedPiece) captured[currentPlayer].push(capturedPiece.type);
-
-        // Detectar enroque
+        // Detectar enroque ANTES de registrar captura
         const castlingMove = possibleMoves.find(m => m.row === toRow && m.col === toCol && m.isCastling);
+
+        if (capturedPiece && !castlingMove) captured[currentPlayer].push(capturedPiece.type);
+
         if (castlingMove) {
             const rookRow = currentPlayer === 'blanca' ? 9 : 0;
             boardState[rookRow][0] = null;
-            boardState[rookRow][1] = piece;       // rey a b
-            boardState[rookRow][2] = { type: 'torre', color: currentPlayer }; // torre a c
-            boardState[fromRow][fromCol] = null;
+            boardState[rookRow][fromCol] = null;
+            boardState[rookRow][1] = piece;       // rey a col 1
+            boardState[rookRow][2] = { type: 'torre', color: currentPlayer }; // torre a col 2
             kingMoved[currentPlayer] = true;
             rookMoved[currentPlayer] = true;
             rebuildBoard();
@@ -339,7 +343,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const enemy = currentPlayer === 'blanca' ? 'negra' : 'blanca';
         if (isKingInCheck(enemy, boardState)) sounds.jaque.play();
-        else if (isCap) sounds.captura.play();
+        else if (isCap && !castlingMove) sounds.captura.play();
         else sounds.mover.play();
 
         clearIndicators();
@@ -350,6 +354,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (gameMode === 'con-tiempo') {
             timers[currentPlayer] += incrementSecs;
             stopTimer();
+        } else {
+            stopSilentTimer();
         }
         currentPlayer = enemy;
 
@@ -361,6 +367,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (gameMode === 'con-tiempo') {
             startTimer();
             updateTimerDisplay();
+        } else {
+            startSilentTimer();
         }
         updateCheckVisuals();
         checkGameOver();
@@ -493,15 +501,17 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('game-footer').style.display = 'flex';
 
         const timersCol = document.querySelector('.timers-col');
+        timersCol.style.display = 'flex'; // Siempre visible
+        silentTimers = { blanca: 0, negra: 0 };
         if (gameMode === 'con-tiempo') {
             timers.blanca = timePerPlayer;
             timers.negra = timePerPlayer;
-            timersCol.style.display = 'flex';
             updateTimerDisplay();
-            startTimer(); // empiezan blancas
+            startTimer();
         } else {
-            timersCol.style.display = 'none';
+            startSilentTimer();
         }
+        updateSidebarForMode();
         createBoard();
         captured.blanca = [];
         captured.negra = [];
@@ -526,6 +536,8 @@ document.addEventListener("DOMContentLoaded", () => {
         timers = { ...snap.timers };
         captured.blanca = [...snap.captured.blanca];
         captured.negra = [...snap.captured.negra];
+        if (snap.kingMoved) { kingMoved.blanca = snap.kingMoved.blanca; kingMoved.negra = snap.kingMoved.negra; }
+        if (snap.rookMoved) { rookMoved.blanca = snap.rookMoved.blanca; rookMoved.negra = snap.rookMoved.negra; }
         stopTimer();
         timerPaused = false;
         if (gameMode === 'con-tiempo') { startTimer(); updateTimerDisplay(); }
@@ -584,6 +596,21 @@ document.addEventListener("DOMContentLoaded", () => {
         startTimer();
     }
 
+    // Tiempo silencioso para modo sin-tiempo
+    let silentTimers = { blanca: 0, negra: 0 };
+    let silentInterval = null;
+
+    function startSilentTimer() {
+        if (silentInterval) clearInterval(silentInterval);
+        silentInterval = setInterval(() => {
+            silentTimers[currentPlayer]++;
+        }, 1000);
+    }
+
+    function stopSilentTimer() {
+        if (silentInterval) { clearInterval(silentInterval); silentInterval = null; }
+    }
+
     // --- BOTONES LATERALES ---
     document.getElementById('btn-undo-top').onclick = undoMove;
     document.getElementById('btn-undo-bottom').onclick = undoMove;
@@ -598,12 +625,21 @@ document.addEventListener("DOMContentLoaded", () => {
     let editSelectedTime = 0;
 
     document.getElementById('btn-edit-time').onclick = () => {
-        if (gameMode !== 'con-tiempo') return;
-        pauseWithBlink();
+        // En modo sin-tiempo también abre el modal (para "Poner tiempo")
+        if (gameMode === 'con-tiempo') pauseWithBlink();
         editSelectedTime = 0;
         editIncSlider.value = incrementSecs;
         editIncValue.textContent = incrementSecs + 's';
         document.querySelectorAll('#edit-time-grid .time-btn').forEach(b => b.classList.remove('active'));
+        // Cambiar título y texto del modal según el modo
+        const modalTitle = document.getElementById('edit-time-modal-title');
+        if (gameMode === 'sin-tiempo') {
+            modalTitle.textContent = 'Poner tiempo';
+            document.getElementById('btn-quit-time').style.display = 'none';
+        } else {
+            modalTitle.textContent = 'Editar tiempo';
+            document.getElementById('btn-quit-time').style.display = '';
+        }
         editTimeModal.style.display = 'block';
     };
 
@@ -643,7 +679,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('btn-apply-time').onclick = () => {
         const errEl = document.getElementById('edit-time-error');
         if (editSelectedTime > 0) {
-            const tiempoGastado = timePerPlayer - Math.min(timers.blanca, timers.negra);
+            // Calcular tiempo ya gastado (real o silencioso)
+            const tiempoGastado = gameMode === 'con-tiempo'
+                ? timePerPlayer - Math.min(timers.blanca, timers.negra)
+                : Math.max(silentTimers.blanca, silentTimers.negra);
+
             if (tiempoGastado >= editSelectedTime) {
                 if (errorTimeout) clearTimeout(errorTimeout);
                 errEl.textContent = 'Error. Selecciona un tiempo más alto o empieza una nueva partida.';
@@ -654,10 +694,27 @@ document.addEventListener("DOMContentLoaded", () => {
                 }, 7000);
                 return;
             }
-            const nuevoRestante = editSelectedTime - tiempoGastado;
-            timers.blanca = nuevoRestante;
-            timers.negra = nuevoRestante;
-            timePerPlayer = editSelectedTime;
+
+            if (gameMode === 'sin-tiempo') {
+                // Activar modo con tiempo
+                gameMode = 'con-tiempo';
+                const nuevoRestante = editSelectedTime - tiempoGastado;
+                timers.blanca = nuevoRestante;
+                timers.negra = nuevoRestante;
+                timePerPlayer = editSelectedTime;
+                stopSilentTimer();
+                // Mostrar timers
+                document.getElementById('timer-negra').style.visibility = 'visible';
+                document.getElementById('timer-blanca').style.visibility = 'visible';
+                // Actualizar botón
+                document.getElementById('btn-edit-time').innerHTML = 'Editar<br>tiempo';
+                updateSidebarForMode();
+            } else {
+                const nuevoRestante = editSelectedTime - tiempoGastado;
+                timers.blanca = nuevoRestante;
+                timers.negra = nuevoRestante;
+                timePerPlayer = editSelectedTime;
+            }
         }
         incrementSecs = parseInt(editIncSlider.value);
         errEl.textContent = '';
@@ -669,12 +726,35 @@ document.addEventListener("DOMContentLoaded", () => {
         startTimer();
     };
 
+    function updateSidebarForMode() {
+        const editBtn = document.getElementById('btn-edit-time');
+        const playBtn = document.getElementById('btn-play');
+        const pauseBtn = document.getElementById('btn-pause');
+        const timerNegra = document.getElementById('timer-negra');
+        const timerBlanca = document.getElementById('timer-blanca');
+        if (gameMode === 'sin-tiempo') {
+            editBtn.innerHTML = 'Poner<br>tiempo';
+            playBtn.style.visibility = 'hidden';
+            pauseBtn.style.visibility = 'hidden';
+            timerNegra.style.visibility = 'hidden';
+            timerBlanca.style.visibility = 'hidden';
+        } else {
+            editBtn.innerHTML = 'Editar<br>tiempo';
+            playBtn.style.visibility = 'visible';
+            pauseBtn.style.visibility = 'visible';
+            timerNegra.style.visibility = 'visible';
+            timerBlanca.style.visibility = 'visible';
+        }
+    }
+
     document.getElementById('btn-quit-time').onclick = () => {
         stopTimer();
         gameMode = 'sin-tiempo';
-        document.querySelector('.timers-col').style.display = 'none';
+        silentTimers = { blanca: 0, negra: 0 };
+        startSilentTimer();
         editTimeModal.style.display = 'none';
         timerPaused = false;
+        updateSidebarForMode();
     };
 
     // --- MODAL CRÉDITOS ---
