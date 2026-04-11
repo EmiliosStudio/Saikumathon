@@ -573,15 +573,40 @@ button:hover { background: #444; }
     color: white;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 10px;
     margin-bottom: 12px;
     cursor: pointer;
+    width: 100%;
 }
 .rotate-label input[type=checkbox] {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     cursor: pointer;
-    accent-color: white;
+    appearance: none;
+    -webkit-appearance: none;
+    border: 2px solid rgba(255,255,255,0.45);
+    border-radius: 4px;
+    background: transparent;
+    position: relative;
+    transition: background 0.25s, border-color 0.25s, box-shadow 0.3s;
+    flex-shrink: 0;
+}
+.rotate-label input[type=checkbox]:checked {
+    background: rgba(255,255,255,0.92);
+    border-color: rgba(255,255,255,0.9);
+    box-shadow: 0 0 10px rgba(210,190,110,0.55), 0 0 22px rgba(210,190,110,0.28);
+}
+.rotate-label input[type=checkbox]:checked::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    width: 6px;
+    height: 11px;
+    border-right: 2.5px solid #3d3a28;
+    border-bottom: 2.5px solid #3d3a28;
+    transform: rotate(45deg);
 }
 #board-col {
     transition: transform 0.6s ease;
