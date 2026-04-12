@@ -1,6 +1,203 @@
+// =============================================
+// SISTEMA DE IDIOMAS
+// =============================================
+const TRANSLATIONS = {
+    es: {
+        subtitle:           'Elige entre...',
+        sinTiempo:          'Jugar sin tiempo',
+        conTiempo:          'Jugar con tiempo',
+        tiempoPersonalizado:'Tiempo personalizado:',
+        incremento:         'Incremento',
+        girarTablero:       'Girar el tablero cada turno',
+        empezar:            'Empezar',
+        editarTiempoBtn:    'Editar<br>tiempo',
+        ponerTiempoBtn:     'Poner<br>tiempo',
+        editarTiempoModal:  'Editar tiempo',
+        ponerTiempoModal:   'Poner tiempo',
+        tiempo:             'Tiempo',
+        personalizado:      'Personalizado:',
+        aplicar:            'Aplicar',
+        quitarTiempo:       'Quitar tiempo',
+        comoMover:          'Cómo mover',
+        creditos:           'Créditos',
+        cambiarIdioma:      'Cambiar idioma',
+        volverMenu:         'Volver al menú',
+        changeLangTitle:    'Cambiar idioma',
+        backMenuMsg:        '¿Seguro que quieres ir a la pantalla de idioma del principio? Si cambias, perderás toda tu partida, y no podrá ser recuperada.',
+        backMenuConfirm:    'Cambiar',
+        backMenuCancel:     'Cancelar',
+        deshacer:           'Deshacer',
+        reanudar:           'Reanudar',
+        pausar:             'Pausar',
+        welcomeText:        'Bienvenido al <strong>Saikumathon Online</strong>, una evolución del ajedrez en un campo de <strong>10x10</strong>, en el que desde un peón más veloz, hasta el perro guardián, una pieza que defiende todo el reinado.',
+        wipText:            'Todavía está por construirse.',
+        creditsList: [
+            ['Idea', "Emilio's Studio"],
+            ['Texto', 'Emiliosans Regular, Sans Serif'],
+            ['Diseño tablero', "Emilio's Studio"],
+            ['Programación juego online', 'Gemini y Claude'],
+            ['Diseño piezas', "Gemini y Emilio's Studio"],
+            ['Traducción inglés', "Emilio's Studio con Deepl Translator"]
+        ],
+        creditsTitle:       'Créditos',
+        pdfPath:            './assets/manuales/manual_espanol.pdf',
+        pdfError:           'Error: no se encontró el PDF en assets/manuales/manual_espanol.pdf',
+        pdfLoading:         'Cargando...',
+        gameoverTimeout:    (winner) => `¡Tiempo agotado!\n${winner} ganan.`,
+        gameoverMate:       (winner) => `¡Jaque mate!\n${winner} ganan.`,
+        gameoverDraw:       '¡Ahogado!\nTablas.',
+        winnerBlack:        'Negras',
+        winnerWhite:        'Blancas',
+        timeError:          'Error. Selecciona un tiempo más alto o empieza una nueva partida.',
+    },
+    en: {
+        subtitle:           'Choose from...',
+        sinTiempo:          'Play without time',
+        conTiempo:          'Play with time',
+        tiempoPersonalizado:'Personalised time:',
+        incremento:         'Increase',
+        girarTablero:       'Turn the board over every turn',
+        empezar:            'Start',
+        editarTiempoBtn:    'Edit<br>time',
+        ponerTiempoBtn:     'Set<br>time',
+        editarTiempoModal:  'Edit time',
+        ponerTiempoModal:   'Set time',
+        tiempo:             'Time',
+        personalizado:      'Custom:',
+        aplicar:            'Apply',
+        quitarTiempo:       'Remove time',
+        comoMover:          'How to move',
+        creditos:           'Credits',
+        cambiarIdioma:      'Change language',
+        volverMenu:         'Back to menu',
+        changeLangTitle:    'Change language',
+        backMenuMsg:        'Are you sure you want to go back to the language screen? If you change, you will lose your entire game and it cannot be recovered.',
+        backMenuConfirm:    'Change',
+        backMenuCancel:     'Cancel',
+        deshacer:           'Undo',
+        reanudar:           'Resume',
+        pausar:             'Pause',
+        welcomeText:        'Welcome to the <strong>Saikumathon Online</strong>, an evolution of chess played on a <strong>10x10</strong> board, featuring everything from a faster pawn to the guardian dog, a piece that defends the entire kingdom.',
+        wipText:            'It has yet to be built...',
+        creditsList: [
+            ['Idea', "Emilio's Studio"],
+            ['Font', 'Emiliosans Regular, Sans Serif'],
+            ['Board design', "Emilio's Studio"],
+            ['Online game programming', 'Gemini & Claude'],
+            ['Piece design', "Gemini & Emilio's Studio"],
+            ['English translation', "Emilio's Studio with Deepl Translator"]
+        ],
+        creditsTitle:       'Credits',
+        pdfPath:            './assets/manuales/manual_ingles.pdf',
+        pdfError:           'Error: PDF not found at assets/manuales/manual_ingles.pdf',
+        pdfLoading:         'Loading...',
+        gameoverTimeout:    (winner) => `Time's up!\n${winner} win.`,
+        gameoverMate:       (winner) => `Checkmate!\n${winner} win.`,
+        gameoverDraw:       'Stalemate!\nDraw.',
+        winnerBlack:        'Black',
+        winnerWhite:        'White',
+        timeError:          'Error. Select a higher time or start a new game.',
+    }
+};
+
+let currentLang = 'es';
+
+function t(key) {
+    return TRANSLATIONS[currentLang][key] || TRANSLATIONS['es'][key] || key;
+}
+
+// Ajusta el font-size de todos los .lang-label-fit para que el texto
+// ocupe el ancho de la bandera, usando el mismo tamaño en todos.
+function fitLangLabels() {
+    const labels = document.querySelectorAll('.lang-label-fit');
+    if (!labels.length) return;
+    // Obtener el ancho de referencia de la primera bandera visible
+    const firstFlag = document.querySelector('.flag-img');
+    const targetWidth = firstFlag ? firstFlag.offsetWidth || 110 : 110;
+    if (targetWidth === 0) return; // aún no visible
+
+    let minSize = 999;
+    labels.forEach(label => {
+        const text = label.dataset.langtext || label.textContent;
+        // Buscar el font-size que hace que el texto mida exactamente targetWidth
+        let lo = 8, hi = 60, size = 16;
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        while (lo <= hi) {
+            const mid = Math.floor((lo + hi) / 2);
+            ctx.font = `${mid}px Emiliosans, sans-serif`;
+            const w = ctx.measureText(text).width;
+            if (w < targetWidth) { size = mid; lo = mid + 1; }
+            else hi = mid - 1;
+        }
+        minSize = Math.min(minSize, size);
+    });
+    labels.forEach(label => {
+        label.style.fontSize = minSize + 'px';
+    });
+}
+
+function applyTranslations() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        const val = TRANSLATIONS[currentLang][key];
+        if (val !== undefined) el.textContent = val;
+    });
+    // Welcome & wip (tienen HTML)
+    const wt = document.getElementById('welcome-text');
+    const wi = document.getElementById('wip-text');
+    if (wt) wt.innerHTML = t('welcomeText');
+    if (wi) wi.textContent = t('wipText');
+    // Créditos
+    const cl = document.getElementById('credits-list');
+    const ct = document.getElementById('credits-title');
+    if (ct) ct.textContent = t('creditsTitle');
+    if (cl) {
+        cl.innerHTML = '';
+        t('creditsList').forEach(([label, val]) => {
+            const p = document.createElement('p');
+            p.innerHTML = `<strong>· ${label}:</strong> ${val}`;
+            cl.appendChild(p);
+        });
+    }
+    // Modal cambiar idioma
+    const clt = document.getElementById('change-lang-title');
+    if (clt) clt.textContent = t('changeLangTitle');
+    // Modal volver al menú
+    const bmm = document.getElementById('back-menu-msg');
+    if (bmm) bmm.textContent = t('backMenuMsg');
+    const bmc = document.getElementById('btn-confirm-back');
+    if (bmc) bmc.textContent = t('backMenuConfirm');
+    const bmcan = document.getElementById('btn-cancel-back');
+    if (bmcan) bmcan.textContent = t('backMenuCancel');
+    // Ajustar tamaño de texto de las banderas para que encajen igual
+    fitLangLabels();
+}
+
+// =============================================
+// FIN SISTEMA DE IDIOMAS
+// =============================================
+
 document.addEventListener("DOMContentLoaded", () => {
     const boardElement = document.getElementById('board');
     const ASSETS_URL = "./assets/";
+
+    // --- SELECCIÓN DE IDIOMA ---
+    // Ajustar texto inicial de banderas
+    requestAnimationFrame(() => fitLangLabels());
+
+    document.getElementById('btn-lang-es').onclick = () => {
+        currentLang = 'es';
+        document.getElementById('lang-screen').style.display = 'none';
+        document.getElementById('start-screen').style.display = 'flex';
+        applyTranslations();
+    };
+    document.getElementById('btn-lang-en').onclick = () => {
+        currentLang = 'en';
+        document.getElementById('lang-screen').style.display = 'none';
+        document.getElementById('start-screen').style.display = 'flex';
+        applyTranslations();
+    };
 
     // --- SONIDOS ---
     const sounds = {
@@ -81,8 +278,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 timers[currentPlayer] = 0;
                 updateTimerDisplay();
                 stopTimer();
-                const winner = currentPlayer === 'blanca' ? 'Negras' : 'Blancas';
-                showGameOver(`¡Tiempo agotado!\n${winner} ganan.`);
+                const winner = currentPlayer === 'blanca' ? t('winnerBlack') : t('winnerWhite');
+                showGameOver(t('gameoverTimeout')(winner));
             }
         }, 1000);
     }
@@ -117,10 +314,10 @@ document.addEventListener("DOMContentLoaded", () => {
     function checkGameOver() {
         if (!hasLegalMoves(currentPlayer, boardState)) {
             if (isKingInCheck(currentPlayer, boardState)) {
-                const winner = currentPlayer === 'blanca' ? 'Negras' : 'Blancas';
-                showGameOver(`¡Jaque mate!\n${winner} ganan.`);
+                const winner = currentPlayer === 'blanca' ? t('winnerBlack') : t('winnerWhite');
+                showGameOver(t('gameoverMate')(winner));
             } else {
-                showGameOver('¡Ahogado!\nTablas.');
+                showGameOver(t('gameoverDraw'));
             }
         }
     }
@@ -499,6 +696,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('game-header').style.display = 'block';
         document.getElementById('game-container').style.display = 'block';
         document.getElementById('game-footer').style.display = 'flex';
+        applyTranslations();
 
         const timersCol = document.querySelector('.timers-col');
         timersCol.style.display = 'flex'; // Siempre visible
@@ -634,10 +832,10 @@ document.addEventListener("DOMContentLoaded", () => {
         // Cambiar título y texto del modal según el modo
         const modalTitle = document.getElementById('edit-time-modal-title');
         if (gameMode === 'sin-tiempo') {
-            modalTitle.textContent = 'Poner tiempo';
+            modalTitle.textContent = t('ponerTiempoModal');
             document.getElementById('btn-quit-time').style.display = 'none';
         } else {
-            modalTitle.textContent = 'Editar tiempo';
+            modalTitle.textContent = t('editarTiempoModal');
             document.getElementById('btn-quit-time').style.display = '';
         }
         editTimeModal.style.display = 'block';
@@ -686,7 +884,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (tiempoGastado >= editSelectedTime) {
                 if (errorTimeout) clearTimeout(errorTimeout);
-                errEl.textContent = 'Error. Selecciona un tiempo más alto o empieza una nueva partida.';
+                errEl.textContent = t('timeError');
                 errEl.style.opacity = "1";
                 errorTimeout = setTimeout(() => {
                     errEl.style.opacity = "0";
@@ -707,7 +905,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById('timer-negra').style.visibility = 'visible';
                 document.getElementById('timer-blanca').style.visibility = 'visible';
                 // Actualizar botón
-                document.getElementById('btn-edit-time').innerHTML = 'Editar<br>tiempo';
+                document.getElementById('btn-edit-time').innerHTML = t('editarTiempoBtn');
                 updateSidebarForMode();
             } else {
                 const nuevoRestante = editSelectedTime - tiempoGastado;
@@ -733,13 +931,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const timerNegra = document.getElementById('timer-negra');
         const timerBlanca = document.getElementById('timer-blanca');
         if (gameMode === 'sin-tiempo') {
-            editBtn.innerHTML = 'Poner<br>tiempo';
+            editBtn.innerHTML = t('ponerTiempoBtn');
             playBtn.style.visibility = 'hidden';
             pauseBtn.style.visibility = 'hidden';
             timerNegra.style.visibility = 'hidden';
             timerBlanca.style.visibility = 'hidden';
         } else {
-            editBtn.innerHTML = 'Editar<br>tiempo';
+            editBtn.innerHTML = t('editarTiempoBtn');
             playBtn.style.visibility = 'visible';
             pauseBtn.style.visibility = 'visible';
             timerNegra.style.visibility = 'visible';
@@ -755,6 +953,79 @@ document.addEventListener("DOMContentLoaded", () => {
         editTimeModal.style.display = 'none';
         timerPaused = false;
         updateSidebarForMode();
+    };
+
+    // --- MODAL CAMBIAR IDIOMA ---
+    const changeLangModal = document.getElementById('change-lang-modal');
+    document.getElementById('open-change-lang').onclick = () => {
+        pauseWithBlink();
+        applyTranslations(); // refrescar títulos
+        fitLangLabels();
+        changeLangModal.style.display = 'block';
+    };
+    document.getElementById('close-change-lang').onclick = () => {
+        changeLangModal.style.display = 'none';
+        resumeFromBlink();
+    };
+    changeLangModal.onclick = (e) => {
+        if (e.target === changeLangModal) {
+            changeLangModal.style.display = 'none';
+            resumeFromBlink();
+        }
+    };
+    // Botones de idioma dentro del modal
+    document.getElementById('modal-btn-lang-es').onclick = () => {
+        currentLang = 'es';
+        changeLangModal.style.display = 'none';
+        resumeFromBlink();
+        applyTranslations();
+        updateSidebarForMode();
+    };
+    document.getElementById('modal-btn-lang-en').onclick = () => {
+        currentLang = 'en';
+        changeLangModal.style.display = 'none';
+        resumeFromBlink();
+        applyTranslations();
+        updateSidebarForMode();
+    };
+
+    // --- MODAL VOLVER AL MENÚ ---
+    const backMenuModal = document.getElementById('back-menu-modal');
+    document.getElementById('open-back-menu').onclick = () => {
+        pauseWithBlink();
+        applyTranslations();
+        backMenuModal.style.display = 'block';
+    };
+    document.getElementById('close-back-menu').onclick = () => {
+        backMenuModal.style.display = 'none';
+        resumeFromBlink();
+    };
+    backMenuModal.onclick = (e) => {
+        if (e.target === backMenuModal) {
+            backMenuModal.style.display = 'none';
+            resumeFromBlink();
+        }
+    };
+    document.getElementById('btn-cancel-back').onclick = () => {
+        backMenuModal.style.display = 'none';
+        resumeFromBlink();
+    };
+    document.getElementById('btn-confirm-back').onclick = () => {
+        // Detener todo y volver a la pantalla de idioma
+        stopTimer();
+        stopSilentTimer();
+        backMenuModal.style.display = 'none';
+        document.getElementById('game-header').style.display = 'none';
+        document.getElementById('game-container').style.display = 'none';
+        document.getElementById('game-footer').style.display = 'none';
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('lang-screen').style.display = 'flex';
+        // Resetear estado de partida
+        moveHistory.length = 0;
+        captured.blanca = []; captured.negra = [];
+        timerPaused = false;
+        gameMode = 'sin-tiempo';
+        requestAnimationFrame(() => fitLangLabels());
     };
 
     // --- MODAL CRÉDITOS ---
@@ -805,15 +1076,15 @@ document.addEventListener("DOMContentLoaded", () => {
     async function loadPDF() {
         if (pdfLoaded) return;
         pdfError.style.display = "none";
-        pdfPageInfo.textContent = "Cargando...";
+        pdfPageInfo.textContent = t('pdfLoading');
         try {
-            const PDF_PATH = "./assets/como_mover_las_piezas.pdf?v=" + Date.now();
+            const PDF_PATH = t('pdfPath') + "?v=" + Date.now();
             pdfDoc = await pdfjsLib.getDocument(PDF_PATH).promise;
             pdfLoaded = true;
             await renderPage(pdfPage);
         } catch (err) {
             pdfError.style.display = "block";
-            pdfError.textContent = `Error: no se encontró el PDF en assets/como_mover_las_piezas.pdf`;
+            pdfError.textContent = t('pdfError');
             pdfPageInfo.textContent = "— / —";
         }
     }
