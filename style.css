@@ -623,3 +623,134 @@ button:hover { background: #444; }
 #board-col.rotated .captured-row {
     flex-direction: row-reverse;
 }
+
+/* ===== PANTALLA DE IDIOMA ===== */
+#lang-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    flex: 1;
+}
+
+.lang-box {
+    background: #3d3a28;
+    border-radius: 16px;
+    padding: 45px 70px 50px;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(0,0,0,0.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+}
+
+.lang-flags-row {
+    display: flex;
+    gap: 60px;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.lang-btn {
+    background: transparent;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    cursor: pointer;
+    padding: 12px 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    color: white;
+}
+
+.lang-btn:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.35);
+    transform: translateY(-2px);
+}
+
+.lang-btn:active {
+    transform: scale(0.97);
+}
+
+.flag-img {
+    width: 110px;
+    height: auto;
+    border-radius: 4px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+    display: block;
+}
+
+.lang-btn span {
+    font-family: 'Emiliosans';
+    color: white;
+    font-weight: normal;
+}
+
+/* ===== MODAL CAMBIAR IDIOMA ===== */
+.change-lang-content {
+    text-align: center;
+    padding: 35px 50px 40px;
+}
+
+.lang-flags-row-modal {
+    gap: 40px;
+}
+
+.flag-img-modal {
+    width: 90px;
+}
+
+/* ===== TEXTO BANDERA FIT ===== */
+.lang-label-fit {
+    font-family: 'Emiliosans';
+    color: white;
+    font-weight: normal;
+    display: block;
+    text-align: center;
+    white-space: nowrap;
+    /* font-size se calcula con JS */
+}
+
+/* ===== MODAL VOLVER AL MENÚ ===== */
+.back-menu-content {
+    text-align: center;
+    padding: 40px 45px 35px;
+    max-width: 420px;
+}
+
+.back-menu-btns {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 4px;
+}
+
+.back-menu-btn-red {
+    font-family: 'Emiliosans';
+    font-size: 1.1em;
+    background: #8b1a1a;
+    color: white;
+    border: 2px solid #ff4d4d88;
+    padding: 9px 28px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.back-menu-btn-red:hover { background: #a82020; }
+
+.back-menu-btn-white {
+    font-family: 'Emiliosans';
+    font-size: 1.1em;
+    background: rgba(255,255,255,0.92);
+    color: #1a1a1a;
+    border: 2px solid rgba(255,255,255,0.5);
+    padding: 9px 28px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.back-menu-btn-white:hover { background: white; }
