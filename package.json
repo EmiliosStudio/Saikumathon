@@ -1,0 +1,58 @@
+{
+  "name": "saikumathon",
+  "version": "1.0.0",
+  "description": "Saikumathon Online - Evolución del ajedrez en 10x10",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win --x64",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux",
+    "build:all": "electron-builder -mwl"
+  },
+  "author": "Emilio's Studio",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.emiliosstudio.saikumathon",
+    "productName": "Saikumathon",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "index.html",
+      "style.css",
+      "script.js",
+      "icon.png",
+      "icon.ico",
+      "icon.icns",
+      "assets/**/*",
+      "tableros/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "icon.icns",
+      "category": "public.app-category.games"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "icon": "icon.png",
+      "category": "Game"
+    }
+  }
+}

@@ -1,0 +1,55 @@
+import pygame
+import sys
+
+# 1. Configuración inicial
+pygame.init()
+pygame.mixer.init()
+PANTALLA = pygame.display.set_mode((800, 600))
+pygame.display.set_caption("Saikumathon - El Perro Guardián")
+
+# 2. Rutas de archivos (Assets)
+PATH_FONT = "assets/fonts/Emiliosans-Regular.ttf"
+PATH_MOVER = "assets/sounds/mover.mp3"
+
+# 3. Cargar Assets
+try:
+    # Usamos un tamaño de 50 para que se vea bien
+    fuente_juego = pygame.font.Font(PATH_FONT, 50)
+    sonido_mover = pygame.mixer.Sound(PATH_MOVER)
+except:
+    print("Error: No se encuentran los archivos en assets. Revisa las carpetas.")
+    fuente_juego = pygame.font.SysFont("Arial", 50) # Fuente de emergencia
+
+# 4. Lógica de movimiento del Perro Guardián
+def es_movimiento_valido(inicio, fin, tablero):
+    dx = fin[0] - inicio[0]
+    dy = fin[1] - inicio[1]
+    
+    # Rango máx de 2 casillas
+    if abs(dx) > 2 or abs(dy) > 2:
+        return False
+    
+    # Si mueve 2, revisa si hay alguien en medio (No saltar)
+    if abs(dx) == 2 or abs(dy) == 2:
+        inter_x = inicio[0] + (dx // 2)
+        inter_y = inicio[1] + (dy // 2)
+        if tablero[inter_x][inter_y] is not None:
+            return False
+            
+    return True
+
+# 5. Bucle principal del juego
+while True:
+    PANTALLA.fill((30, 30, 30)) # Fondo oscuro
+    
+    for evento in pygame.event.get():
+        if evento.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+    # Dibujar el texto de Créditos
+    # TIP: Si no sale la "é", cámbialo a "CREDITOS"
+    texto = fuente_juego.render("Creditos", True, (255, 255, 255))
+    PANTALLA.blit(texto, (300, 500))
+
+    pygame.display.flip()
