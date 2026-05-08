@@ -986,3 +986,343 @@ button:hover { background: #444; }
     color: rgba(255,255,255,0.4);
     margin: 0;
 }
+/* ============================================
+   RESPONSIVE DESIGN - MÓVILES Y TABLETS
+   ============================================ */
+
+/* TABLET (768px - 1024px) */
+@media (max-width: 1024px) and (min-width: 768px) {
+    body {
+        zoom: 0.75; /* Reducir un poco más en tablets */
+    }
+    
+    #game-container {
+        gap: 20px;
+        padding: 15px;
+    }
+    
+    .sidebar {
+        width: 180px;
+    }
+    
+    #board {
+        width: 350px;
+        height: 350px;
+        padding: 17.5px;
+    }
+    
+    .footer {
+        font-size: 1.5em;
+    }
+    
+    .button-group button {
+        font-size: 0.85em;
+        padding: 8px 14px;
+    }
+}
+
+/* MÓVIL (hasta 767px) */
+@media (max-width: 767px) {
+    body {
+        zoom: 1; /* Quitar zoom en móviles - usar 100% */
+        padding: 10px;
+        overflow-y: auto; /* Permitir scroll vertical */
+        height: auto;
+        min-height: 100vh;
+    }
+    
+    /* Pantalla de idioma */
+    .language-screen {
+        padding: 20px 15px;
+        gap: 20px;
+    }
+    
+    .lang-option {
+        width: 140px;
+        height: 140px;
+    }
+    
+    .lang-option img {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .lang-label {
+        font-size: 1.3em;
+    }
+    
+    /* Pantalla de inicio */
+    .start-box {
+        width: 95%;
+        max-width: 400px;
+        padding: 25px 20px;
+    }
+    
+    .start-title {
+        font-size: 2.5em;
+    }
+    
+    h1 {
+        font-size: 1.8em;
+    }
+    
+    .welcome-text {
+        font-size: 0.9em;
+        line-height: 1.4;
+    }
+    
+    .time-section {
+        gap: 8px;
+    }
+    
+    .time-option {
+        width: 70px;
+        height: 70px;
+        font-size: 0.85em;
+    }
+    
+    .start-btn {
+        font-size: 1.3em;
+        padding: 12px;
+    }
+    
+    /* Layout del juego - VERTICAL en móvil */
+    #game-container {
+        flex-direction: column;
+        gap: 15px;
+        padding: 10px;
+        width: 95%;
+        max-width: 500px;
+    }
+    
+    .game-layout {
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+    }
+    
+    /* Tablero más pequeño */
+    #board {
+        width: 280px;
+        height: 280px;
+        padding: 14px;
+    }
+    
+    .square {
+        width: 28px;
+        height: 28px;
+    }
+    
+    /* Sidebar abajo del tablero */
+    .sidebar {
+        width: 100%;
+        max-width: 280px;
+        order: 2; /* Poner después del tablero */
+    }
+    
+    .captured-pieces {
+        min-height: 40px;
+    }
+    
+    .captured-piece {
+        width: 24px;
+        height: 24px;
+    }
+    
+    /* Botones laterales más grandes para touch */
+    .undo-top, .undo-bottom {
+        width: 50px;
+        height: 50px;
+        font-size: 1.8em;
+    }
+    
+    .play-pause-btn, .edit-time-btn {
+        height: 50px;
+        font-size: 1.1em;
+    }
+    
+    /* Footer responsive */
+    .footer {
+        flex-direction: column;
+        gap: 12px;
+        font-size: 1.2em;
+        margin-top: 10px;
+        padding: 10px;
+    }
+    
+    .button-group {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .button-group button {
+        font-size: 0.9em;
+        padding: 10px 16px;
+        min-width: 120px;
+    }
+    
+    /* Modales responsive */
+    .modal-content {
+        width: 90%;
+        max-width: 400px;
+        padding: 20px 15px;
+        min-width: 0;
+    }
+    
+    .modal-content h2 {
+        font-size: 1.6em;
+    }
+    
+    .modal-content p {
+        font-size: 0.95em;
+    }
+    
+    .confirm-btn {
+        font-size: 1em;
+        padding: 10px 18px;
+        min-width: 100px;
+    }
+    
+    /* Modal de tiempo */
+    .edit-time-modal-inner {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .edit-col {
+        width: 100%;
+    }
+    
+    .edit-col-divider {
+        display: none;
+    }
+    
+    .time-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .time-btn {
+        font-size: 1em;
+        padding: 12px;
+    }
+    
+    /* Modal de créditos */
+    .credits-list {
+        font-size: 0.9em;
+    }
+    
+    .credits-version {
+        font-size: 0.7em;
+    }
+    
+    /* Modal de revisión */
+    #review-modal .modal-content {
+        width: 95%;
+        max-width: none;
+        padding: 12px 8px;
+    }
+    
+    .review-main {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .review-left, .review-right {
+        width: 100%;
+    }
+    
+    #review-board {
+        width: 240px;
+        height: 240px;
+        padding: 12px;
+    }
+    
+    #review-board .square {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .review-nav {
+        gap: 10px;
+        margin: 10px 0;
+    }
+    
+    .review-arrow {
+        width: 50px;
+        height: 50px;
+        font-size: 1.3em;
+    }
+    
+    .review-counter {
+        font-size: 0.95em;
+    }
+    
+    .review-history-list {
+        max-height: 200px;
+    }
+    
+    .review-move-badge {
+        width: 14px;
+        height: 14px;
+    }
+    
+    /* PDF viewer en móvil */
+    #pdf-canvas {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    .pdf-controls {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .pdf-btn {
+        font-size: 1.1em;
+        padding: 8px 14px;
+    }
+}
+
+/* MÓVIL PEQUEÑO (hasta 380px) */
+@media (max-width: 380px) {
+    .start-title {
+        font-size: 2em;
+    }
+    
+    h1 {
+        font-size: 1.5em;
+    }
+    
+    #board {
+        width: 240px;
+        height: 240px;
+        padding: 12px;
+    }
+    
+    .square {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .sidebar {
+        max-width: 240px;
+    }
+    
+    #review-board {
+        width: 200px;
+        height: 200px;
+        padding: 10px;
+    }
+    
+    #review-board .square {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .button-group button {
+        font-size: 0.85em;
+        padding: 8px 12px;
+        min-width: 100px;
+    }
+}
