@@ -1032,31 +1032,39 @@ button:hover { background: #444; }
         min-height: 100vh;
     }
     
-    /* Pantalla de idioma */
+    /* Pantalla de idioma - altura completa, bordecitos laterales */
     .language-screen {
-        padding: 20px 15px;
-        gap: 20px;
+        padding: 0 8%;
+        gap: 40px;
+        min-height: 100vh;
+        height: 100vh;
+        justify-content: center;
     }
     
     .lang-option {
-        width: 140px;
-        height: 140px;
+        width: 160px;
+        height: 160px;
     }
     
     .lang-option img {
-        width: 80px;
-        height: 80px;
+        width: 100px;
+        height: 100px;
     }
     
     .lang-label {
-        font-size: 1.3em;
+        font-size: 1.5em;
     }
     
-    /* Pantalla de inicio */
+    /* Pantalla de inicio - altura completa, bordecitos laterales */
     .start-box {
-        width: 95%;
-        max-width: 400px;
-        padding: 25px 20px;
+        width: 92%;
+        max-width: 450px;
+        padding: 30px 4%;
+        min-height: 100vh;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
     
     .start-title {
@@ -1128,41 +1136,72 @@ button:hover { background: #444; }
         width: 100%;
     }
     
-    /* Tablero más pequeño */
+    /* Tablero más grande - ocupar casi todo el ancho */
     #board {
-        width: 280px;
-        height: 280px;
-        padding: 14px;
+        width: min(92vw, 420px);
+        height: min(92vw, 420px);
+        padding: calc(min(92vw, 420px) * 0.05); /* 5% del tamaño como padding */
     }
     
     /* Las casillas se dimensionan automáticamente por el grid */
     
-    /* Sidebar abajo del tablero */
+    /* Sidebar horizontal - controles lado a lado */
     .sidebar {
         width: 100%;
-        max-width: 280px;
-        order: 2; /* Poner después del tablero */
+        max-width: min(92vw, 420px);
+        order: 2; /* Después del tablero */
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    
+    /* Piezas capturadas arriba - ancho completo */
+    .captured-section {
+        width: 100%;
+        order: -1;
     }
     
     .captured-pieces {
-        min-height: 40px;
+        min-height: 35px;
+        padding: 4px;
     }
     
     .captured-piece {
-        width: 24px;
-        height: 24px;
+        width: 22px;
+        height: 22px;
     }
     
-    /* Botones laterales más grandes para touch */
-    .undo-top, .undo-bottom {
-        width: 50px;
-        height: 50px;
+    /* Timers lado a lado */
+    .timer-white, .timer-black {
+        flex: 1;
+        min-width: 120px;
+        height: 60px;
         font-size: 1.8em;
     }
     
+    /* Controles debajo en fila */
+    .controls-section {
+        width: 100%;
+        display: flex;
+        gap: 8px;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    /* Botones laterales más compactos para layout horizontal */
+    .undo-top, .undo-bottom {
+        width: 45px;
+        height: 45px;
+        font-size: 1.6em;
+    }
+    
     .play-pause-btn, .edit-time-btn {
-        height: 50px;
-        font-size: 1.1em;
+        height: 45px;
+        font-size: 1em;
+        flex: 1;
+        min-width: 100px;
     }
     
     /* Footer responsive */
@@ -1316,15 +1355,25 @@ button:hover { background: #444; }
     }
     
     #board {
-        width: 240px;
-        height: 240px;
-        padding: 12px;
+        width: min(90vw, 350px);
+        height: min(90vw, 350px);
+        padding: calc(min(90vw, 350px) * 0.05);
     }
     
     /* Squares auto-sized by grid */
     
     .sidebar {
-        max-width: 240px;
+        max-width: min(90vw, 350px);
+    }
+    
+    .lang-option {
+        width: 140px;
+        height: 140px;
+    }
+    
+    .lang-option img {
+        width: 90px;
+        height: 90px;
     }
     
     #review-board {
