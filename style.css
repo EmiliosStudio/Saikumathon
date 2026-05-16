@@ -1025,41 +1025,41 @@ button:hover { background: #444; }
 /* MÓVIL (hasta 767px) */
 @media (max-width: 767px) {
     body {
-        zoom: 1; /* Quitar zoom en móviles - usar 100% */
-        padding: 10px;
-        overflow-y: auto; /* Permitir scroll vertical */
+        zoom: 1; /* Sin zoom en móviles */
+        padding: 0;
+        overflow-y: auto;
         height: auto;
         min-height: 100vh;
     }
     
-    /* Pantalla de idioma - altura completa, bordecitos laterales */
+    /* ========== PANTALLA DE IDIOMA ========== */
     .language-screen {
-        padding: 0 8%;
-        gap: 40px;
+        padding: 0 5%;
+        gap: 50px;
         min-height: 100vh;
         height: 100vh;
         justify-content: center;
     }
     
     .lang-option {
-        width: 160px;
-        height: 160px;
+        width: 180px;
+        height: 180px;
     }
     
     .lang-option img {
-        width: 100px;
-        height: 100px;
+        width: 120px;
+        height: 120px;
     }
     
     .lang-label {
-        font-size: 1.5em;
+        font-size: 1.6em;
     }
     
-    /* Pantalla de inicio - altura completa, bordecitos laterales */
+    /* ========== PANTALLA DE INICIO (TIEMPO) ========== */
     .start-box {
-        width: 92%;
-        max-width: 450px;
-        padding: 30px 4%;
+        width: 90%;
+        max-width: none;
+        padding: 0 5%;
         min-height: 100vh;
         height: 100vh;
         display: flex;
@@ -1068,7 +1068,8 @@ button:hover { background: #444; }
     }
     
     .start-title {
-        font-size: 2.5em;
+        font-size: 2.8em;
+        margin-bottom: 10px;
     }
     
     h1 {
@@ -1076,155 +1077,177 @@ button:hover { background: #444; }
     }
     
     .welcome-text {
-        font-size: 0.9em;
-        line-height: 1.4;
+        font-size: 0.85em;
+        line-height: 1.3;
+        margin-bottom: 15px;
     }
     
     .time-section {
-        gap: 8px;
+        gap: 10px;
     }
     
     .time-grid {
         grid-template-columns: repeat(2, 1fr);
-        max-width: 200px;
-        gap: 6px 12px;
+        gap: 8px 12px;
+        max-width: 300px;
+        margin: 0 auto;
     }
     
     .time-option {
-        width: 90px;
-        height: 90px;
-        font-size: 0.95em;
+        width: auto;
+        height: 80px;
+        font-size: 1em;
     }
     
     .custom-time-row {
         font-size: 0.9em;
         gap: 6px;
-        margin-top: 6px;
+        margin-top: 8px;
     }
     
     .custom-time-row input[type=number] {
-        width: 45px;
-        font-size: 0.9em;
-        padding: 3px 6px;
+        width: 50px;
+        font-size: 0.95em;
+        padding: 4px 8px;
     }
     
     #increment-slider {
-        width: 110px;
+        width: 120px;
     }
     
     .inc-row {
         font-size: 0.85em;
     }
     
-    .start-btn {
-        font-size: 1.3em;
-        padding: 12px;
+    .rotate-label {
+        font-size: 0.9em;
+        margin-top: 10px;
     }
     
-    /* Layout del juego - VERTICAL en móvil */
+    .start-btn {
+        font-size: 1.4em;
+        padding: 14px;
+        margin-top: 15px;
+    }
+    
+    /* ========== PANTALLA DE JUEGO ========== */
     #game-container {
         flex-direction: column;
         gap: 15px;
-        padding: 10px;
-        width: 95%;
-        max-width: 500px;
+        padding: 10px 3%;
+        width: 100%;
+        max-width: none;
     }
     
     .game-layout {
         flex-direction: column;
         gap: 12px;
         width: 100%;
+        align-items: center;
     }
     
-    /* Tablero más grande - ocupar casi todo el ancho */
+    /* TABLERO - ocupa casi todo el ancho */
     #board {
-        width: min(92vw, 420px);
-        height: min(92vw, 420px);
-        padding: calc(min(92vw, 420px) * 0.05); /* 5% del tamaño como padding */
+        width: min(94vw, 500px);
+        height: min(94vw, 500px);
+        padding: calc(min(94vw, 500px) * 0.05);
     }
     
-    /* Las casillas se dimensionan automáticamente por el grid */
-    
-    /* Sidebar horizontal - controles lado a lado */
+    /* SIDEBAR HORIZONTAL - timers y controles en fila */
     .sidebar {
-        width: 100%;
-        max-width: min(92vw, 420px);
-        order: 2; /* Después del tablero */
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
+        width: min(94vw, 500px);
+        order: 2;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto auto;
         gap: 10px;
-        align-items: flex-start;
     }
     
-    /* Piezas capturadas arriba - ancho completo */
+    /* Piezas capturadas - ancho completo arriba */
     .captured-section {
-        width: 100%;
-        order: -1;
+        grid-column: 1 / -1;
     }
     
     .captured-pieces {
         min-height: 35px;
-        padding: 4px;
+        padding: 5px;
+        justify-content: center;
     }
     
     .captured-piece {
-        width: 22px;
-        height: 22px;
+        width: 24px;
+        height: 24px;
     }
     
     /* Timers lado a lado */
-    .timer-white, .timer-black {
-        flex: 1;
-        min-width: 120px;
-        height: 60px;
-        font-size: 1.8em;
+    .timer-white {
+        grid-column: 1;
+        grid-row: 2;
+        height: 70px;
+        font-size: 2em;
     }
     
-    /* Controles debajo en fila */
+    .timer-black {
+        grid-column: 2;
+        grid-row: 2;
+        height: 70px;
+        font-size: 2em;
+    }
+    
+    /* Controles abajo en fila */
     .controls-section {
-        width: 100%;
+        grid-column: 1 / -1;
+        grid-row: 3;
         display: flex;
         gap: 8px;
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
     }
     
-    /* Botones laterales más compactos para layout horizontal */
     .undo-top, .undo-bottom {
-        width: 45px;
-        height: 45px;
-        font-size: 1.6em;
+        width: 50px;
+        height: 50px;
+        font-size: 1.8em;
     }
     
     .play-pause-btn, .edit-time-btn {
-        height: 45px;
-        font-size: 1em;
+        height: 50px;
+        font-size: 1.1em;
         flex: 1;
-        min-width: 100px;
+        max-width: 150px;
     }
     
-    /* Footer responsive */
+    /* ========== FOOTER - HORIZONTAL ========== */
     .footer {
         flex-direction: row;
         flex-wrap: wrap;
-        gap: 10px;
-        font-size: 1em;
-        margin-top: 10px;
-        padding: 10px;
+        gap: 8px;
+        font-size: 0.9em;
+        margin-top: 12px;
+        padding: 8px;
         justify-content: center;
+        align-items: center;
+    }
+    
+    .footer > span {
+        width: 100%;
+        text-align: center;
+        font-size: 0.85em;
     }
     
     .button-group {
+        display: flex;
         flex-wrap: wrap;
         justify-content: center;
         gap: 6px;
+        width: 100%;
     }
     
     .button-group button {
-        font-size: 0.8em;
-        padding: 8px 12px;
-        min-width: 90px;
+        font-size: 0.75em;
+        padding: 8px 10px;
+        min-width: 80px;
+        flex: 0 1 auto;
     }
     
     /* Modales responsive */
